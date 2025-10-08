@@ -21,7 +21,6 @@ describe("getAclSpecificationTool", () => {
     if (result.content[0].type === "text") {
       const text = result.content[0].text;
       expect(text).toContain("Agent Communication Language (ACL)");
-      expect(text).toContain("Language Specification");
       expect(text).toContain("## 1. Introduction");
     }
   });
@@ -32,8 +31,8 @@ describe("getAclSpecificationTool", () => {
     if (result.content[0].type === "text") {
       // Verify it contains typical ACL spec sections
       const text = result.content[0].text;
-      expect(text).toContain("Built-in Objects");
-      expect(text).toContain("agent");
+      expect(text).toContain("## 4. Objects");
+      expect(text).toContain("ACL");
       expect(text).toContain("project");
       expect(text).toContain("session");
     }

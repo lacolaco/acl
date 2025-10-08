@@ -1,731 +1,1013 @@
 # Agent Communication Language (ACL)
-## Language Specification v1.0
+
+## Version 1.1
 
 ---
 
 ## 1. Introduction
 
-### 1.1 Purpose
-Agent Communication Language (ACL) is a Domain-Specific Language (DSL) designed for concise, precise, and structured communication with AI agents. It provides a programming-oriented syntax for instructing agents to perform actions on objects and systems within a development environment.
+### Purpose
 
-### 1.2 Core Principle: Contextual Flexibility
+Agent Communication Language (ACL) is a Domain-Specific Language (DSL) for concise, structured communication with AI agents. It provides a simple syntax for instructing agents in development workflows.
 
-**ACL embraces contextual interpretation over strict formalism.**
+### Core Principle: Context Over Formalism
 
-While ACL provides structured syntax and well-defined objects, it fundamentally prioritizes **user intent and contextual understanding**. When faced with undefined objects or methods, the agent must:
+**ACL prioritizes intent and context over strict syntax rules.**
 
-1. **Interpret from context first** - Leverage conversation history, project state, and domain knowledge
-2. **Infer reasonable meanings** - Make intelligent assumptions based on available information
-3. **Resort to errors last** - Only fail when context provides no interpretive pathway
+This is not a language for static parsing—it's a communication protocol for LLMs. The agent should:
 
-This principle distinguishes ACL from traditional programming languages: **flexibility through context, not rigidity through definition**.
+1. **Understand intent first** - Focus on what the user wants
+2. **Interpret from context** - Use conversation history and project state
+3. **Be flexible** - Adapt to variations in syntax and expression
 
-### 1.3 Design Goals
-- **Brevity**: Minimize verbosity while maintaining clarity
-- **Precision**: Unambiguous command specification
-- **Composability**: Enable complex workflows through simple primitives
-- **Persistence**: Support knowledge retention across sessions and projects
-- **Discoverability**: Auto-generate project-specific commands
-- **Flexibility**: Interpret undefined elements from context when possible
+### Design Goals
 
-### 1.4 Scope
-ACL is intended for:
+- **Simplicity**: Easy to learn and use
+- **Brevity**: Minimal verbosity
+- **Flexibility**: Context-aware interpretation
+- **Composability**: Chain operations naturally
+- **Persistence**: Retain knowledge across sessions
+
+### Scope
+
+ACL is for:
+
 - Development workflow automation
-- Agent behavior control
-- Knowledge management and persistence
-- Project-specific command abstraction
+- Agent behavior customization
+- Knowledge management
+- Error handling and recovery
 
 ---
 
-## 2. Lexical Structure
+## 2. Core Concept: scope.action(details)
 
-### 2.1 Identifiers
-- Object names: `[a-zA-Z_][a-zA-Z0-9_]*`
-- Method names: `[a-zA-Z_][a-zA-Z0-9_]*`
+### Basic Structure
 
-### 2.2 Literals
-- **String**: `"text"` or `'text'`
-- **Number**: `123`, `3.14`
-- **Boolean**: `true`, `false`
-- **Array**: `[item1, item2, ...]`
-- **Object**: `{ key: value, ... }`
+All ACL expressions follow a simple pattern:
 
-### 2.3 Comments
-```acl
-# Single-line comment
+```
+scope.action(details)
 ```
 
-### 2.4 Reserved Operators
-- `:=` - Assignment/Declaration
-- `&&` - Sequential execution (AND)
-- `.` - Member access
+**Components**:
 
----
-
-## 3. Syntax
-
-### 3.1 Method Invocation
-```ebnf
-method_call ::= object "." method "(" [arguments] ")"
-arguments   ::= expression ("," expression)*
-expression  ::= literal | identifier | method_call
-```
-
-**Example**:
-```acl
-app.serve()
-chrome.inspect(app)
-project.note("convention")
-```
-
-### 3.2 Object Declaration
-```ebnf
-declaration ::= identifier ":=" expression
-```
-
-**Example**:
-```acl
-api := server.new("http://localhost:3000")
-postgres := db.connect("postgresql://localhost/mydb")
-```
-
-### 3.3 Method Definition
-```ebnf
-method_def ::= object_name ":" "{" method_list "}"
-method_list ::= method_name ":" definition ("," method_name ":" definition)*
-definition ::= exec_command | prompt_command | method_composition
-exec_command ::= "exec" "(" shell_command ["," options] ")"
-prompt_command ::= string | natural_language_instruction
-method_composition ::= method_call ("&&" method_call)*
-```
-
-**Definition Types**:
-1. **Shell Execution**: `exec("command")` - Execute shell command directly
-2. **Prompt/Instruction**: Any string or natural language - Agent interprets and executes
-3. **Method Composition**: Combine existing methods with `&&`
+- **scope**: Where the action takes place (optional for global functions)
+- **action**: What to do
+- **details**: Parameters or context (optional)
 
 **Examples**:
+
 ```acl
-project: {
-  # Shell execution
-  build: exec("pnpm run build")
-  test: exec("pnpm test")
-  dev: exec("pnpm run dev", { cwd: "./frontend" })
+fix("failing tests")           # Global function (no scope)
+project.build()                # Object method
+test("auth/**")                # Global with parameter
+note("convention")             # Global with parameter
+project.note("convention")     # Object method with parameter
+```
 
-  # Prompt-based definition (flexible interpretation)
-  fix: "Fix failed tests and run them again"
-  optimize: "Analyze and optimize bundle size"
+### Variations
 
-  # Method composition
-  verify: project.build && project.test
-  release: project.build && project.test && project.deploy
+**Multiple parameters**:
+
+```acl
+refactor("UserService", "extract authentication")
+```
+
+**Chaining**:
+
+```acl
+project.build() && test() && project.deploy()
+```
+
+**Property access**:
+
+```acl
+fix(test().failures)
+```
+
+**Promise-like handling**:
+
+```acl
+project.deploy()
+  .then("notify team")
+  .catch("rollback")
+  .finally("cleanup")
+```
+
+**Alert handling**:
+
+```acl
+alert("stop and analyze the issue")
+```
+
+### Interpretation Rules
+
+The agent should interpret ACL expressions flexibly:
+
+- Missing scope → assume global function or infer from context
+- Unknown method → check for typos, aliases, or context clues
+- Ambiguous syntax → prioritize user intent over strict parsing
+
+---
+
+## 3. Global Functions
+
+### Overview
+
+Global functions work across all projects and are called without a scope prefix. These are built-in functions defined by the ACL system.
+
+### Built-in Function Definitions
+
+```acl
+fn begin(goal): void {
+  description: "Begin working on task with git branch and TODO planning"
+  action: [
+    "Create dedicated git branch for the task",
+    "Draft initial TODO list based on goal",
+    "Request user agreement on approach"
+  ]
+}
+
+fn fix(issue): void {
+  description: "Analyze and fix problems"
+  action: [
+    "Diagnose root cause of the issue",
+    "Implement solution",
+    "Verify fix works correctly"
+  ]
+}
+
+fn refactor(targets, direction): void {
+  description: "Refactor safely with tests"
+  action: [
+    test(),
+    "Refactor code according to direction",
+    test()
+  ]
+}
+
+fn think(issue): string {
+  description: "Analyze without modifying files"
+  action: "Read-only analysis, provide insights and recommendations without making any changes"
+}
+
+fn test(pattern?): object {
+  description: "Run tests"
+  action: "Analyze test coverage first, generate minimal specs if insufficient, execute tests, report results with .failures (array), .errors (array), .passed (number)"
+}
+
+fn alert(message): void {
+  description: "Alert agent about violations or mistakes"
+  action: [
+    "Immediately stop all current work",
+    "Analyze the problem thoroughly",
+    "Present detailed analysis to user",
+    "Await explicit user approval before taking any corrective action"
+  ]
+}
+
+fn retry(): any {
+  description: "Retry last failed task"
+  action: "Detect last failed operation from context, retry it with same parameters"
+}
+
+fn fetch(url): object {
+  description: "Fetch web resources"
+  action: "HTTP GET request to URL, return content with .content (string), .status (number), .headers (object)"
+}
+
+fn note(message): void {
+  description: "Save to user-level CLAUDE.md"
+  action: "Append message to ~/.claude/CLAUDE.md, persist across all projects"
+}
+
+fn docs(targets): void {
+  description: "Understand targets and enrich documentation"
+  action: "Analyze specified modules/classes/APIs, understand their purpose and usage, add or improve documentation"
+}
+
+fn review(target): string {
+  description: "Code review; focus on analysis, never edit code"
+  action: "Analyze code quality, patterns, architecture, and potential issues. Provide insights on maintainability, performance, security, and best practices. Never modify code."
+}
+
+fn exec(command): number {
+  description: "Execute shell command"
+  action: "Run command synchronously in shell, return exit code. Throw error on non-zero exit."
 }
 ```
 
-### 3.4 Command Chaining
-```ebnf
-chain ::= method_call ("&&" method_call)*
-```
+### Usage
 
-**Example**:
 ```acl
-app.serve() && chrome.inspect(app)
-project.build() && project.test() && project.deploy()
-```
+# Begin a task
+begin("implement user authentication")
+begin("add pagination to API")
+begin("refactor database layer")
 
-### 3.5 Method Composition
-```ebnf
-composition ::= method_call "(" method_call ")"
-```
+# Fix issues
+fix("typescript errors")
+fix("failing unit tests")
 
-**Example**:
-```acl
-project.note(session.insights())
-agent.note(session.insights())
+# Safe refactoring
+refactor("auth module", "separate concerns")
+
+# Analysis only (no changes)
+think("optimal caching strategy")
+
+# Run tests
+test()                    # All tests
+test("integration/**")    # Pattern filter
+
+# Agent feedback
+alert("You violated the security policy")
+
+# Retry after fixing
+project.deploy()  # Fails
+fix("credentials")
+retry()           # Retries deploy
+
+# Fetch external data
+fetch("https://api.example.com/data")
+
+# Save user-level notes
+note("Use TypeScript strict mode")
+note("Prefer composition over inheritance")
+
+# Enrich documentation
+docs("authentication module")
+docs("API endpoints")
+docs("UserService class")
+
+# Code review (analysis only, no edits)
+review("src/main.ts")
+review("authentication module")
+
+# Execute shell command
+exec("git status")
+exec("npm test")
 ```
 
 ---
 
-## 4. Type System
+## 4. Objects
 
-### 4.1 Built-in Types
-- `String`: Text data
-- `Number`: Numeric values
-- `Boolean`: `true` or `false`
-- `Array`: Ordered collection
-- `Object`: Key-value pairs
-- `Void`: No return value
+### ACL Object
 
-### 4.2 Object Types
+```acl
+obj ACL = "ACL system management; provides initialization, definition loading, scanning, and introspection capabilities for Agent Communication Language"
 
-#### 4.2.1 Special Objects (Always Available)
-- `agent` - Agent control and user-level knowledge management
-- `project` - Project context and project-level knowledge management
-- `session` - Session context and analysis
+fn ACL.init(): void {
+  description: "Initialize ACL for current project"
+  action: [
+    "Create CLAUDE.md if not exists",
+    "Add '# ACL Method Definitions' section with ```acl codeblock",
+    "Scan project structure for build tools (package.json scripts, Makefile, etc.)",
+    "Generate initial obj and fn definitions based on detected tools",
+    "Save definitions to CLAUDE.md ACL Method Definitions section"
+  ]
+}
 
-#### 4.2.2 Standard Objects (Context-Dependent)
-- `app` - Application control
-- `chrome`/`browser` - Browser and DevTools
-- `server` - Server operations
-- `db` - Database operations
-- `test` - Testing operations
+fn ACL.load(): void {
+  description: "Load project's ACL definitions into working context"
+  action: [
+    "Read CLAUDE.md file",
+    "Parse ACL Method Definitions section",
+    "Extract all obj declarations",
+    "Extract all fn definitions (global functions and object methods)",
+    "Load definitions into agent's working memory for command execution"
+  ]
+}
 
-#### 4.2.3 User-Defined Objects
-Objects declared via `:=` operator
+fn ACL.scan(): void {
+  description: "Re-scan project and update ACL definitions"
+  action: [
+    "Scan current project structure",
+    "Detect new or changed build tools and scripts",
+    "Compare with existing definitions in CLAUDE.md",
+    "Update CLAUDE.md ACL Method Definitions section with changes",
+    "Reload definitions into context"
+  ]
+}
 
----
+fn ACL.list(): void {
+  description: "Display all available ACL definitions"
+  action: [
+    "Read loaded ACL definitions from context",
+    "Format output showing objects, global functions, and object methods",
+    "Display with signatures and return types",
+    "Include session objects if available"
+  ]
+}
+```
 
-## 5. Built-in Objects
+**Examples**:
 
-### 5.1 `agent` Object
+```acl
+ACL.init()                              # Setup project
+ACL.load()                              # Load project ACL definitions
+ACL.list()                              # See available methods
+```
 
-**Type**: Special (Always Available)
+**ACL.list() Output Example**:
 
-**Purpose**: Control AI agent behavior and manage user-level persistent knowledge
+```
+Available ACL Definitions:
 
-**Methods**:
-| Method | Signature | Description |
-|--------|-----------|-------------|
-| `retry()` | `() -> Void` | Retry last failed or interrupted operation |
-| `note(message)` | `(String) -> Void` | Save to user-level CLAUDE.md (`~/.claude/CLAUDE.md`) |
+Objects:
+  spec = "ACL spec file; ACL.md"
+  project = "MCP server implementation that provides ACL support"
+
+Global Functions:
+  begin(goal): void
+  fix(issue): void
+  refactor(targets, direction): void
+  think(issue): string
+  test(pattern?): object
+  alert(message): void
+  retry(): any
+  fetch(url): object
+  note(message): void
+  docs(targets): void
+  review(target): string
+  exec(command): number
+  finish(task): void
+
+Object Methods:
+  project.test(): void
+  project.typecheck(): void
+  project.start(): void
+  project.build(): void
+  project.format(): void
+  project.inspect(): void
+  project.inspectDist(): void
+
+Session Objects:
+  session.summary(): string
+  session.insights(): string
+```
+
+### project Object
+
+```acl
+obj project = "Current project context; provides access to project-specific build tools, commands, and configurations"
+
+fn project.note(message): void {
+  description: "Save important information to project's CLAUDE.md"
+  action: [
+    "Read current CLAUDE.md or .claude/CLAUDE.md",
+    "Append message to appropriate section or create new section",
+    "Save file with formatted markdown",
+    "Confirm save to user"
+  ]
+}
+```
+
+**Dynamic Methods** (generated by `ACL.init()` and `ACL.scan()`):
+
+Methods are automatically generated based on detected build tools:
+- From `package.json` scripts: `project.test()`, `project.build()`, `project.lint()`, etc.
+- From `Makefile` targets: `project.make_target()`
+- From `justfile` recipes: `project.recipe()`
+
+Each generated method executes the corresponding command via `exec()`.
 
 **Properties**:
-| Property | Type | Description |
-|----------|------|-------------|
-| `state` | `String` | Current state: `running`, `paused`, `idle` |
-| `context` | `Object` | Current conversation context |
 
-**Persistence**:
-- `agent.note(message)` → `~/.claude/CLAUDE.md`
-- Scope: All projects for current user
-- Use for: Personal preferences, coding standards
+- `project.name` - Project name from package.json or directory
+- `project.root` - Project root directory path
+- `project.config` - Project configuration object
 
-### 5.2 `project` Object
-
-**Type**: Special (Always Available)
-
-**Purpose**: Manage project context and project-level persistent knowledge
-
-**Core Methods**:
-| Method | Signature | Description |
-|--------|-----------|-------------|
-| `init()` | `() -> Void` | Initialize project, scan build system, generate methods |
-| `update()` | `() -> Void` | Re-scan and update method definitions |
-| `note(message)` | `(String) -> Void` | Save to project-level CLAUDE.md (`.claude/CLAUDE.md`) |
-
-**Dynamic Methods** (Generated by `init()`/`update()`):
-- `build()` - Execute build command
-- `test()` - Execute test command
-- `lint()` - Execute lint command
-- `dev()` - Execute dev server
-- `deploy()` - Execute deployment
-- And more... (project-specific)
-
-**Properties**:
-| Property | Type | Description |
-|----------|------|-------------|
-| `name` | `String` | Project name |
-| `root` | `String` | Project root directory |
-| `config` | `Object` | Project configuration |
-| `methods` | `Array<String>` | Available method names |
-
-**Persistence**:
-- `project.note(message)` → `.claude/CLAUDE.md`
-- Scope: Current project only
-- Use for: Project conventions, architecture decisions
-
-**Method Generation**:
-1. `project.init()` initializes `.claude/CLAUDE.md`:
-   - Creates file if it doesn't exist
-   - Adds ACL definition section with placeholder:
-     ```acl
-     # ACL Method Definitions
-     project: {}
-     ```
-
-2. Scans project for commands:
-   - `package.json` scripts
-   - `Makefile` targets
-   - `justfile` recipes
-   - `Taskfile.yml` tasks
-
-3. Populates method definitions in `.claude/CLAUDE.md`:
-   ```acl
-   # ACL Method Definitions
-   project: {
-     build: exec("pnpm run build")
-     test: exec("pnpm test")
-     lint: exec("pnpm run lint")
-   }
-   ```
-
-4. Methods become available: `project.build()`, `project.test()`, etc.
-
-**ACL Definition Area**:
-The `# ACL Method Definitions` section in `.claude/CLAUDE.md` serves as the designated area for method definitions. This area is:
-- Created by `project.init()`
-- Updated by `project.update()`
-- Reserved for ACL syntax (not Markdown)
-- Starts with placeholder `project: {}`
-- Expanded as methods are discovered
-
-### 5.3 `session` Object
-
-**Type**: Special (Always Available)
-
-**Purpose**: Analyze and extract information from current conversation session
-
-**Methods**:
-| Method | Signature | Description |
-|--------|-----------|-------------|
-| `summary()` | `() -> String` | Generate session summary |
-| `insights()` | `() -> String` | Extract actionable insights from session |
-
-**Properties**:
-| Property | Type | Description |
-|----------|------|-------------|
-| `id` | `String` | Unique session identifier |
-| `duration` | `Number` | Session duration (seconds) |
-| `objects` | `Array<String>` | Declared object names |
-
----
-
-## 6. Standard Objects
-
-### 6.1 `app` Object
-**Purpose**: Application control
-
-**Methods**:
-- `serve()` - Start application server
-- `setupRoutes(routes)` - Configure routing
-- `build()` - Build application
-- `test()` - Run tests
-
-### 6.2 `chrome`/`browser` Object
-**Purpose**: Browser and DevTools operations
-
-**Methods**:
-- `inspect(target)` - Open DevTools
-- `open(url)` - Open URL in browser
-
-### 6.3 `server` Object
-**Purpose**: Server operations
-
-**Methods**:
-- `start(port?)` - Start server
-- `stop()` - Stop server
-- `restart()` - Restart server
-
-### 6.4 `db` Object
-**Purpose**: Database operations
-
-**Methods**:
-- `connect(config?)` - Connect to database
-- `migrate()` - Run migrations
-- `seed()` - Seed database
-
-### 6.5 `test` Object
-**Purpose**: Testing operations
-
-**Methods**:
-- `run(pattern?)` - Run tests
-- `watch()` - Watch mode
-- `coverage()` - Generate coverage
-
----
-
-## 7. Execution Model
-
-### 7.1 Execution Order
-1. **Parse**: Tokenize and parse ACL command
-2. **Validate**: Check object/method existence
-3. **Resolve**: Resolve undefined objects from context
-4. **Execute**: Execute command(s) sequentially (if chained)
-5. **Return**: Return result or void
-
-### 7.2 Sequential Execution
-Commands chained with `&&` execute left-to-right:
-```acl
-project.build() && project.test() && project.deploy()
-# Executes: build → test → deploy
-```
-
-### 7.3 Context Preservation
-- Object references maintain state across chains
-- Declared objects persist within session
-- Method definitions persist in CLAUDE.md files
-
-### 7.4 Object Resolution
-
-**Principle of Contextual Interpretation**:
-ACL prioritizes flexibility and user intent over strict definitions. When an object or method is undefined, the agent **MUST** attempt contextual interpretation before raising errors.
-
-**Resolution Process**:
-1. **Context Inference** (Primary):
-   - Analyze conversation history for object/method meaning
-   - Check for implicit definitions or references
-   - Infer from project structure and environment
-   - Consider domain-specific conventions
-
-2. **Similarity Matching** (Secondary):
-   - Check for typos and near-matches
-   - Suggest closest defined objects/methods
-   - Consider common aliases (e.g., `browser` ↔ `chrome`)
-
-3. **Error Handling** (Last Resort):
-   - Only raise error if context provides no clues
-   - Provide helpful suggestions based on available objects
-   - Guide user toward correction or clarification
-
-**Examples of Contextual Interpretation**:
+**Examples**:
 
 ```acl
-# User mentions "I'm working on the frontend app"
-frontend.build()
-# → Agent infers: frontend := app.new("./frontend")
-#    Executes build for frontend context
-
-# User has been discussing database migrations
-db.run()
-# → Agent infers: db.run() likely means db.migrate()
-#    Based on conversation context
-
-# User added "deploy" script to package.json
+project.note("This project uses TypeScript strict mode")
+project.build()
 project.deploy()
-# → Agent infers: Even without project.init(), recognizes new script
-#    Auto-generates: project.deploy := exec("npm run deploy")
 ```
 
-**Contextual Clues**:
-- Recent conversation topics
-- Files/directories mentioned
-- Commands executed in session
-- Project configuration changes
-- Domain-specific terminology
+**Scope**: Current project only
+
+### session Object
+
+```acl
+obj session = "Current conversation context; provides analysis and insights about the ongoing session"
+
+fn session.summary(): string {
+  description: "Generate comprehensive summary of current session"
+  action: [
+    "Analyze conversation history from beginning to current point",
+    "Identify key decisions, changes, and outcomes",
+    "Extract important technical details and context",
+    "Format as structured markdown summary",
+    "Return summary string"
+  ]
+  returns: "Markdown-formatted summary of session including goals, actions taken, decisions made, and current state"
+}
+
+fn session.insights(): string {
+  description: "Extract actionable insights from current session"
+  action: [
+    "Analyze patterns and problems encountered",
+    "Identify lessons learned and best practices discovered",
+    "Extract reusable knowledge and recommendations",
+    "Format as bullet points or structured text",
+    "Return insights string"
+  ]
+  returns: "Actionable insights and lessons learned that should be preserved for future reference"
+}
+```
+
+**Properties**:
+
+- `session.id` - Unique identifier for current session
+- `session.duration` - Time elapsed since session start
+
+**Examples**:
+
+```acl
+project.note(session.insights())  # Save to project
+note(session.summary())            # Save to user-level
+```
+
+**Scope**: Current conversation only
 
 ---
 
-## 8. Error Handling
+## 5. Chaining & Handlers
 
-### 8.1 Undefined Object Error
+### Sequential Execution
 
-**Format**:
-```
-ACL Error: Undefined object '<object_name>'
+**Operator Chaining** - Use `&&` to chain operations:
 
-The object '<object_name>' is not defined in the current context.
-
-Built-in objects (always available):
-- agent (Agent control - special)
-- project (Project context - special)
-- session (Session context - special)
-
-Standard objects:
-- app (Application control)
-- chrome/browser (Browser operations)
-- server (Server operations)
-- db (Database operations)
-- test (Testing operations)
-
-Did you mean: [suggestions based on similarity]
+```acl
+project.build() && test() && project.deploy()
 ```
 
-**Resolution**:
-1. Agent attempts context inference
-2. Agent checks for similar names
-3. If unable to resolve, return error with suggestions
-4. User corrects object name or uses natural language
+**Array Format** - Use array syntax for sequential steps:
+
+```acl
+action: [
+  project.build(),
+  test(),
+  project.deploy()
+]
+```
+
+**Semantics** (both formats):
+
+- Evaluates operations sequentially from left-to-right (or top-to-bottom in arrays)
+- Each operation must complete successfully before the next begins
+- If any operation fails (throws error or returns non-zero), execution stops immediately
+- Subsequent operations are not executed
+- Returns the error/result of the failed operation
+
+**Note**: Array format is preferred for multi-step actions in function definitions as it's more readable and allows mixing of expressions and natural language prompts.
+
+### Promise-like Chains
+
+Handle success, failure, and cleanup:
+
+```acl
+method()
+  .then(action_on_success)
+  .catch(action_on_failure)
+  .finally(action_for_cleanup)
+```
+
+**Execution**:
+
+- Success: method → then → finally
+- Failure: method → catch → finally
+
+**Examples**:
+
+```acl
+project.deploy()
+  .then("send Slack notification")
+  .catch("rollback and alert team")
+  .finally("update deployment log")
+
+project.build()
+  .then(test())
+  .then(project.deploy())
+  .catch(fix("build or test failures"))
+```
+
+### Output Redirection
+
+Use `>` to apply operation results to a target:
+
+```acl
+operation > target
+```
+
+**Semantics**:
+
+1. Evaluate left-side operation completely
+2. Pass the result (return value or output) as input to the right-side target
+3. If target is a function, call it with the result as argument
+4. If target is a file/identifier (like `spec`), apply changes to that target
+
+**Examples**:
+
+```acl
+delete(":= operator").instead("obj and fn keywords") > spec
+# 1. Execute delete().instead() chain, producing modification instructions
+# 2. Apply those modifications to the spec (ACL.md)
+
+fix("type errors") > project.note()
+# 1. Execute fix("type errors"), producing a summary
+# 2. Call project.note() with that summary
+
+session.insights() > note()
+# 1. Execute session.insights(), returning insights string
+# 2. Call note() with insights string as argument
+```
+
+**Target Types**:
+
+- **Function call**: `result > functionName()` - calls function with result
+- **File identifier**: `result > spec` - applies result to named file
+- **Property access**: `result > object.property` - sets property value
+
+### Alert System
+
+The `alert()` function provides a mechanism for users to notify the agent of violations or mistakes.
+
+**Behavior**:
+1. Agent immediately stops all current work
+2. Agent analyzes the alert and the problem
+3. Agent presents problem analysis to user
+4. Agent **awaits explicit approval** of the analysis before taking any corrective action
+5. After approval, agent proceeds with fixes or follows user instruction
+
+**Critical Rule**: The agent must NOT attempt to fix problems or modify anything before receiving user approval of the problem analysis.
+
+**Examples**:
+
+```acl
+alert("You modified the wrong file")
+# → Agent immediately halts current work
+# → Agent analyzes what was modified and why it's wrong
+# → Agent presents analysis: "I modified config.prod.yml instead of config.dev.yml because..."
+# → Agent waits for approval
+# → After approval: Agent proceeds to revert/fix
+
+alert("You don't understand the requirements")
+# → Agent stops
+# → Agent analyzes: "I misunderstood requirement X to mean Y, but it actually means Z"
+# → Agent waits for confirmation
+# → After confirmation: Agent proceeds with correct understanding
+```
+
+**Use Cases**:
+- Notify agent of policy violations
+- Catch agent mistakes or misunderstandings early
+- Halt problematic operations immediately
+- Ensure agent understanding before corrective action
+
+### Error Handling Semantics
+
+**Failure Conditions**:
+
+- Function returns non-zero exit code
+- Function throws an error/exception
+- Function explicitly fails (e.g., tests fail, build fails)
+
+**Agent Behavior on Failure**:
+
+1. **With `&&`**: Stop chain, report error, await user instruction
+2. **With `.catch()`**: Execute catch handler, continue to `.finally()` if present
+3. **With `alert()`**: Stop all current work, analyze problem, present analysis, await approval before corrective action
+4. **Standalone**: Report error with context, suggest fixes, await user instruction
 
 **Example**:
+
 ```acl
-deployment.start()
-→ ACL Error: Undefined object 'deployment'
-  Available objects: app, agent, chrome, server, db, test
-  Did you mean: server.start() or app.start()?
+project.build() && test()
+# If build fails: agent stops, reports build error, does not run tests
+
+project.build()
+  .then(test())
+  .catch(fix("build failure"))
+# If build fails: agent executes fix("build failure")
 ```
 
 ---
 
-## 9. Common Patterns
+## 6. Knowledge Management
 
-### 9.1 Start and Inspect
-```acl
-app.serve() && chrome.inspect(app)
-```
-Launch application and open debugging tools
-
-### 9.2 Configure and Execute
-```acl
-app.setupRoutes([root, admin]) && app.serve()
-```
-Apply configuration before execution
-
-### 9.3 Knowledge Persistence (User-Level)
-```acl
-agent.note("Components don't need the -component suffix")
-```
-Save user-wide preferences to `~/.claude/CLAUDE.md`
-
-### 9.4 Knowledge Persistence (Project-Level)
-```acl
-project.note("This project uses feature-based folder structure")
-```
-Save project-specific conventions to `.claude/CLAUDE.md`
-
-### 9.5 Session Insights to Knowledge Base
-```acl
-project.note(session.insights())  # Project-specific learnings
-agent.note(session.insights())    # User-wide learnings
-```
-Extract and persist session learnings
-
-### 9.6 Project Initialization
-```acl
-project.init()
-project.build() && project.test()
-```
-Auto-generate and use project methods
-
-### 9.7 Update Project Methods
-```acl
-project.update()
-project.e2e()  # Newly added method
-```
-Refresh methods after build system changes
-
----
-
-## 10. Knowledge Management
-
-### 10.1 Knowledge Hierarchy
+### Hierarchy
 
 ```
 User Level (~/.claude/CLAUDE.md)
-  ↓ applies to all projects
-  Personal preferences, coding standards
-  Managed via: agent.note()
+  ↓ Personal preferences, coding standards
+  Managed via: note()
 
-Project Level (.claude/CLAUDE.md)
-  ↓ applies to current project
-  Project conventions, architecture
+Project Level (.claude/CLAUDE.md or CLAUDE.md)
+  ↓ Project conventions, architecture
   Managed via: project.note()
 
 Session Level (temporary)
-  ↓ current conversation only
+  ↓ Current conversation insights
   Analyzed via: session.insights(), session.summary()
 ```
 
-### 10.2 Persistence Rules
+### Persistence
 
-| Method | Target File | Scope | Use Case |
-|--------|-------------|-------|----------|
-| `agent.note()` | `~/.claude/CLAUDE.md` | All projects | Personal preferences |
-| `project.note()` | `.claude/CLAUDE.md` | Current project | Project conventions |
-| `session.insights()` | Return value | Temporary | Extract learnings |
-| `session.summary()` | Return value | Temporary | Session overview |
+| Method               | File                               | Scope           | Use Case             |
+| -------------------- | ---------------------------------- | --------------- | -------------------- |
+| `note()`             | `~/.claude/CLAUDE.md`              | All projects    | Personal preferences |
+| `project.note()`     | `.claude/CLAUDE.md` or `CLAUDE.md` | Current project | Project conventions  |
+| `session.insights()` | Return value                       | Temporary       | Extract learnings    |
 
-### 10.3 Method Definition Storage
+### Method Definitions
 
-**File Structure**:
-`.claude/CLAUDE.md` contains both human-readable documentation and ACL definitions:
+Project CLAUDE.md contains ACL method definitions within an `acl` codeblock:
 
-```markdown
-# Project Context
-
-[Human-readable project documentation, conventions, etc.]
-
+````markdown
 # ACL Method Definitions
-project: {
-  build: exec("pnpm run build")
-  test: exec("pnpm test")
-  lint: exec("pnpm run lint", { cwd: "./src" })
+
+```acl
+obj project = "Current project context"
+
+fn project.build(): void {
+  description: "Build the project"
+  action: exec("pnpm run build")
+}
+
+fn project.lint(): void {
+  description: "Lint the project"
+  action: exec("pnpm run lint")
+}
+
+fn project.deploy(): void {
+  description: "Deploy the project"
+  action: exec("pnpm run deploy")
 }
 ```
+````
 
-**ACL Definition Area Rules**:
-1. **Initialization**: `project.init()` creates:
-   ```acl
-   # ACL Method Definitions
-   project: {}
-   ```
+**Format Requirements**:
 
-2. **Expansion**: Methods are added as discovered:
-   ```acl
-   # ACL Method Definitions
-   project: {
-     build: exec("pnpm run build")
-     test: exec("pnpm test")
-   }
-   ```
+- Must be wrapped in ` ```acl ` codeblock
+- Section header: `# ACL Method Definitions`
 
-3. **Updates**: `project.update()` modifies this section, preserving structure
+**Management**:
 
-4. **Separation**: ACL syntax section is distinct from Markdown documentation
+- Created by `ACL.init()`
+- Updated by `ACL.scan()`
+- Listed by `ACL.list()`
 
 ---
 
-## 11. Object Lifecycle
+## 7. Common Patterns
 
-### 11.1 Declaration
+### Starting Tasks
+
 ```acl
-objectName := <definition>
+begin("implement user login feature")
+begin("add email validation")
+begin("create order processing workflow")
 ```
 
-### 11.2 Method Definition
+### Quick Fixes
+
 ```acl
-objectName: {
-  methodName: exec("command")
-}
+fix("failing tests")
+fix("typescript errors")
+fix(lint().errors)
 ```
 
-### 11.3 Usage
+### Safe Refactoring
+
 ```acl
-objectName.methodName()
+refactor("auth module", "extract logic")
+refactor("API routes", "consolidate error handling")
 ```
 
-### 11.4 Scope
-- Objects persist within current session
-- Methods persist in CLAUDE.md files
-- Built-in objects always available
+### Build Pipelines
 
----
-
-## 12. Advanced Features
-
-### 12.1 Method Options
-
-**Working Directory**:
 ```acl
-project: {
-  dev: exec("pnpm run dev", { cwd: "./frontend" })
-}
+project.build() && test() && project.deploy()
+
+project.build()
+  .then(test())
+  .then(project.deploy())
+  .catch(fix("pipeline failure"))
 ```
 
-**Environment Variables**:
+### Error Handling
+
 ```acl
-myApp: {
-  deploy: exec("./deploy.sh", { env: { ENV: "production" } })
-}
+project.deploy()
+  .then("notify team")
+  .catch("rollback")
+  .finally("cleanup resources")
 ```
 
-### 12.2 Method Composition
+### Knowledge Capture
+
 ```acl
-# Pass method results as arguments
+note("Use TypeScript strict mode")
+note("Prefer composition over inheritance")
+project.note("This project uses feature-based folders")
 project.note(session.insights())
-agent.note(session.summary())
-
-# Store results
-insights := session.insights()
-project.note(insights)
 ```
 
-### 12.3 Conditional Workflows
+### Web Resources
+
 ```acl
-project.build() && project.test() && project.deploy()
-# deploy only executes if build and test succeed
+fetch("https://api.github.com/repos/owner/repo")
+obj apiData = fetch("https://api.example.com/metrics")
+think(apiData.content)
+```
+
+### Method Composition
+
+```acl
+fix(test().failures)
+refactor(lint().errors, "improve code quality")
+think(project.analyze().bottlenecks)
+```
+
+### Documentation
+
+```acl
+docs("authentication module")
+docs("UserService class")
+docs("REST API endpoints")
+```
+
+### Custom Workflows
+
+Define custom workflows:
+
+```acl
+fn finish(task): void {
+  description: "Complete task with cleanup, tests, commit, and PR"
+  action: tidyUp() && test() && git.branch(task) && git.commit(task).push() && github.pr(task)
+}
+
+# Usage
+finish("add user authentication")
+finish("fix login bug")
 ```
 
 ---
 
-## 13. Best Practices
+## 8. Best Practices
 
-### 13.1 When to Use ACL
-- ✅ Quick workflow execution
-- ✅ Combining multiple operations
-- ✅ Saving persistent preferences
-- ✅ Controlling agent behavior
-- ✅ Project-specific automation
+### When to Use ACL
 
-### 13.2 When to Use Natural Language
+- ✅ Quick workflows
+- ✅ Build pipelines
+- ✅ Error handling
+- ✅ Knowledge persistence
+- ✅ Agent customization
+
+### When to Use Natural Language
+
 - ✅ Complex explanations
 - ✅ Exploratory questions
-- ✅ Tasks requiring judgment
-- ✅ Unclear command mapping
+- ✅ Unclear mappings
 
-### 13.3 Naming Conventions
-- Use camelCase for method names: `buildAndTest()`
-- Use lowercase for object names: `myapp`, `postgres`
+### Naming
+
+- Use camelCase: `buildAndTest()`
 - Be descriptive but concise
+- Follow project conventions
 
-### 13.4 Knowledge Management
-- Use `agent.note()` for universal preferences
-- Use `project.note()` for project-specific rules
-- Call `project.update()` after changing build scripts
-- Extract insights with `session.insights()` at end of work
+### Knowledge Management
 
----
+- `note()` for personal preferences (user-level)
+- `project.note()` for project-specific rules
+- `ACL.scan()` after changing build scripts
+- `session.insights()` at end of work
 
-## 14. Comparison with Natural Language
+### Error Handling
 
-| Aspect | ACL | Natural Language |
-|--------|-----|------------------|
-| **Verbosity** | Low | High |
-| **Precision** | High | Variable |
-| **Learning Curve** | Medium | Low |
-| **Flexibility** | Structured | Open-ended |
-| **Execution Speed** | Fast | Slower |
-| **Best For** | Automation | Communication |
-| **Ambiguity** | None | Possible |
-| **Composability** | High | Low |
+- Use `.then/.catch/.finally` for critical operations
+- Use `alert()` to immediately halt agent on violations or mistakes
+
+### Method Safety
+
+- Remove dangerous method definitions from CLAUDE.md
+- Common: disable production deploys, destructive operations
 
 ---
 
-## 15. Future Extensions (Proposed)
+## 9. Declaration Syntax
 
-- **Conditional execution**: `if condition then command`
-- **Variable binding**: `result := command()`
-- **Loops**: `for item in items do command`
-- **Pipelines**: `command1 | command2`
-- **Error handling**: `try command catch handler`
-- **Object destruction**: `destroy objectName`
-- **Object inspection**: `inspect objectName`
-- **Async execution**: `async command`
+### Object and Function Definitions
 
----
+ACL provides keywords for declaring objects and functions:
 
-## Appendix A: Grammar (EBNF)
+#### 1. Object Declaration
 
-```ebnf
-program        ::= statement*
-statement      ::= declaration | method_call | method_def | chain
-declaration    ::= identifier ":=" expression
-method_call    ::= object "." method "(" [arguments] ")"
-method_def     ::= identifier ":" "{" method_list "}"
-method_list    ::= method_name ":" definition ("," method_name ":" definition)*
-definition     ::= "exec" "(" string ["," options] ")"
-chain          ::= method_call ("&&" method_call)*
-arguments      ::= expression ("," expression)*
-expression     ::= literal | identifier | method_call
-literal        ::= string | number | boolean | array | object
-options        ::= "{" key_value ("," key_value)* "}"
-key_value      ::= identifier ":" expression
-identifier     ::= [a-zA-Z_][a-zA-Z0-9_]*
-string         ::= '"' .* '"' | "'" .* "'"
-number         ::= [0-9]+ ("." [0-9]+)?
-boolean        ::= "true" | "false"
-array          ::= "[" [expression ("," expression)*] "]"
-object         ::= "{" [key_value ("," key_value)*] "}"
+Define an object with the `obj` keyword:
+
+**Syntax**:
+
+```acl
+obj objectName = "description"
 ```
 
+**Examples**:
+
+```acl
+obj api = "API server instance"
+
+obj project = "Current project context with build and deployment methods"
+
+obj spec = "ACL specification file; ACL.md"
+```
+
+**Stored as** in CLAUDE.md:
+```acl
+obj objectName = "description"
+```
+
+#### 2. Object Method Definition
+
+Define methods on an object using `fn` with object scope:
+
+**Syntax**:
+
+```acl
+fn objectName.methodName(parameters): returnType {
+  description: "Human-readable description"
+  action: implementation
+}
+```
+
+**Examples**:
+
+```acl
+fn project.build(): void {
+  description: "Build the project"
+  action: exec("pnpm run build")
+}
+
+fn project.deploy(env): void {
+  description: "Deploy to specified environment"
+  action: [
+    project.build(),
+    test(),
+    server.deploy(env)
+  ]
+}
+
+fn project.verify(): void {
+  description: "Verify project integrity"
+  action: project.build() && test()
+}
+```
+
+**Stored as** in CLAUDE.md:
+```acl
+fn objectName.methodName(parameters): returnType {
+  description: "..."
+  action: ...
+}
+```
+
+#### 3. Global Function Definition
+
+Define a global function using the `fn` keyword with return type annotation:
+
+**Syntax**:
+
+```acl
+fn functionName(parameters): returnType {
+  description: "Human-readable description"
+  action: implementation
+}
+```
+
+**Components**:
+- `fn` - Function definition keyword
+- `functionName(parameters)` - Function signature
+- `: returnType` - Return type annotation (void, string, object, etc.)
+- `description` - Human-readable explanation of what the function does
+- `action` - Implementation in one of these formats:
+  - Single expression: `action: expression`
+  - Natural language: `action: "prompt text"`
+  - Sequential steps (array): `action: [step1, step2, step3]`
+
+**Examples**:
+
+```acl
+# Single expression action
+fn quickTest(): void {
+  description: "Run tests quickly"
+  action: test()
+}
+
+# Sequential chain action (&&)
+fn finish(task): void {
+  description: "Complete task with cleanup and PR creation"
+  action: tidyUp() && test() && git.commit(task).push() && github.pr(task)
+}
+
+# Array format for multi-step action
+fn deploy(env): void {
+  description: "Deploy with comprehensive checks"
+  action: [
+    project.build(),
+    test(),
+    "Verify environment configuration",
+    server.deploy(env),
+    "Notify team of deployment"
+  ]
+}
+
+# Natural language action
+fn review(target): string {
+  description: "Comprehensive code review with quality metrics"
+  action: "Analyze code quality, patterns, architecture, and potential issues. Focus on analysis only, never edit code. Provide detailed insights on maintainability, performance, and best practices."
+}
+```
+
+**Stored as** in CLAUDE.md:
+
+```acl
+fn functionName(parameters): returnType {
+  description: "Human-readable description"
+  action: implementation
+}
+```
+
+**Note**: The `obj` and `fn` keywords are the standard syntax for ACL definitions.
+
+### CLAUDE.md Format
+
+All definitions are stored in the ACL Method Definitions section:
+
+````markdown
+# ACL Method Definitions
+
+```acl
+# Objects
+obj project = "Current project context"
+
+# Object methods
+fn project.test(): void {
+  description: "Run project tests"
+  action: exec("pnpm test")
+}
+
+fn project.build(): void {
+  description: "Build the project"
+  action: exec("pnpm run build")
+}
+
+# Global functions
+fn finish(task): void {
+  description: "Complete task with cleanup and PR"
+  action: tidyUp() && test() && git.commit(task).push() && github.pr(task)
+}
+```
+````
+
+**Behavior**:
+
+All definitions using `obj` and `fn` keywords are stored in the CLAUDE.md ACL Method Definitions section.
+
 ---
 
-## Appendix B: Reserved Keywords
+## 10. Operators & Keywords
 
-- `exec` - Command execution
-- `true` - Boolean true
-- `false` - Boolean false
+### Operators
+
+- `>` - Output redirection (apply result to target)
+- `&&` - Sequential chaining (stop on failure)
+- `.` - Method chaining and property access
+
+### Reserved Keywords
+
+- `obj` - Object declaration keyword
+- `fn` - Function definition keyword
+- `then(action)` - Promise success handler
+- `catch(action)` - Promise error handler
+- `finally(action)` - Promise cleanup handler
+- `spec` - File identifier for ACL.md
+- `void` - Return type indicating no return value
+- `any` - Return type for dynamic values
+- `string`, `number`, `object`, `array` - Return type annotations
 
 ---
 
-## Appendix C: File Locations
+## 11. File Locations
 
-| File | Location | Purpose |
-|------|----------|---------|
-| User-level CLAUDE.md | `~/.claude/CLAUDE.md` | User-wide agent configuration |
-| Project-level CLAUDE.md | `.claude/CLAUDE.md` | Project-specific agent configuration |
-| ACL definitions | Within CLAUDE.md files | Method definitions |
+| File              | Location                           | Purpose                 |
+| ----------------- | ---------------------------------- | ----------------------- |
+| User CLAUDE.md    | `~/.claude/CLAUDE.md`              | User-wide configuration |
+| Project CLAUDE.md | `.claude/CLAUDE.md` or `CLAUDE.md` | Project configuration   |
+| ACL definitions   | Within CLAUDE.md files             | Method definitions      |
 
 ---
 
-**Version**: 1.0
-**Last Updated**: 2025-10-05
+**Version**: 3.8
+**Last Updated**: 2025-10-07

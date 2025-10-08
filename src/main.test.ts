@@ -69,7 +69,7 @@ describe("MCP Server Integration", () => {
     expect(firstContent).toHaveProperty("type", "text");
     if (firstContent.type === "text") {
       expect(firstContent.text).toContain("Agent Communication Language (ACL)");
-      expect(firstContent.text).toContain("Language Specification");
+      expect(firstContent.text).toContain("## 1. Introduction");
     }
   });
 });
