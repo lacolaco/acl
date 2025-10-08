@@ -1,12 +1,16 @@
 {
   "name": "@lacolaco/acl",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "",
+  "publishConfig": {
+    "access": "public"
+  },
   "main": "./dist/main.cjs",
   "module": "./dist/main.mjs",
   "types": "./dist/main.d.ts",
   "files": [
-    "dist"
+    "dist",
+    "ACL.md"
   ],
   "bin": {
     "acl-mcp-server": "./dist/main.js"
