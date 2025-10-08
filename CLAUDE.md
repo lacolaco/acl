@@ -65,26 +65,35 @@ This project implements the Agent Communication Language (ACL) specification def
 
 ## Publishing
 
-This package uses **npm Trusted Publishing** with OIDC authentication for secure package publishing without long-lived tokens.
+This package uses **automated releases** with release-please and **npm Trusted Publishing** with OIDC authentication.
 
-### Setup Requirements
+### Publishing Process
 
-1. **npm Configuration** (on npmjs.com):
-   - Navigate to package settings → "Trusted Publisher"
-   - Configure:
-     - Organization: `lacolaco`
-     - Repository: `acl`
-     - Workflow: `.github/workflows/publish.yml`
+1. **Commit with Conventional Commits**:
+   - Use conventional commit format: `feat:`, `fix:`, `docs:`, etc.
+   - Push commits to main branch
 
-2. **Publishing Process**:
-   - Create and push a git tag: `git tag v0.0.1 && git push --tags`
-   - GitHub Actions workflow automatically builds, tests, and publishes
-   - Uses OIDC for authentication (no secrets required)
+2. **Automatic Release PR**:
+   - release-please automatically creates/updates a release PR
+   - The PR includes version bump and CHANGELOG updates
 
-3. **Requirements**:
-   - npm 11.5.1+ (automatically upgraded in workflow)
-   - `id-token: write` permission in workflow
-   - `publishConfig.access: "public"` in package.json
+3. **Publish**:
+   - Merge the release PR
+   - GitHub Actions automatically publishes to npm with provenance
+   - Uses OIDC authentication (no secrets required)
+
+### npm Trusted Publisher Setup
+
+Configure on npmjs.com package settings → "Trusted Publisher":
+- Organization: `lacolaco`
+- Repository: `acl`
+- Workflow: `.github/workflows/publish.yml`
+
+### Technical Requirements
+
+- npm 11.5.1+ (automatically upgraded in workflow)
+- `id-token: write` permission for OIDC
+- `publishConfig.provenance: true` in package.json
 
 ## Key Dependencies
 
