@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.4](https://github.com/lacolaco/acl/compare/v1.3.3...v1.3.4) (2025-10-08)
+
+
+### Bug Fixes
+
+* remove spec object from core ACL documentation ([#36](https://github.com/lacolaco/acl/issues/36)) ([b874836](https://github.com/lacolaco/acl/commit/b8748367021091c0d39f8a043464d1677f686582))
+
 ## [1.3.3](https://github.com/lacolaco/acl/compare/v1.3.2...v1.3.3) (2025-10-08)
 
 
