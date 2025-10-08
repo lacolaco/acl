@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.1](https://github.com/lacolaco/acl/compare/v1.3.0...v1.3.1) (2025-10-08)
+
+
+### Bug Fixes
+
+* add executable hashbang and extract server factory ([#27](https://github.com/lacolaco/acl/issues/27)) ([f12f473](https://github.com/lacolaco/acl/commit/f12f47304680cf822b98bd4ccae9b0c61e53c75d))
+
 ## [1.3.0](https://github.com/lacolaco/acl/compare/v1.2.0...v1.3.0) (2025-10-08)
 
 
