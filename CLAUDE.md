@@ -210,8 +210,11 @@ fn project.inspectDist(): void {
 }
 
 fn begin(goal): task {
-  description: "Begin working on task with git branch and TODO planning; pairs with finish(task)"
+  description: "Begin working on task with git branch and TODO planning; ALWAYS starts from up-to-date origin/main; pairs with finish(task)"
   action: [
+    "Switch to main branch with git checkout main",
+    "Fetch latest changes with git fetch origin",
+    "Update local main with git pull origin main",
     "Create dedicated git branch for the task",
     "Draft initial TODO list based on goal",
     "Request user agreement on approach"

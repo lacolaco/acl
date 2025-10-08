@@ -119,15 +119,6 @@ Global functions work across all projects and are called without a scope prefix.
 ### Built-in Function Definitions
 
 ```acl
-fn begin(goal): void {
-  description: "Begin working on task with git branch and TODO planning"
-  action: [
-    "Create dedicated git branch for the task",
-    "Draft initial TODO list based on goal",
-    "Request user agreement on approach"
-  ]
-}
-
 fn fix(issue): void {
   description: "Analyze and fix problems"
   action: [
@@ -200,11 +191,6 @@ fn exec(command): number {
 ### Usage
 
 ```acl
-# Begin a task
-begin("implement user authentication")
-begin("add pagination to API")
-begin("refactor database layer")
-
 # Fix issues
 fix("typescript errors")
 fix("failing unit tests")
