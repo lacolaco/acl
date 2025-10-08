@@ -12,9 +12,17 @@ on:
       - '.vscode/**'
       - '.github/**'
       - '!.github/workflows/publish.yml'
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: 'Git ref to publish (tag, branch, or commit SHA)'
+        required: true
+        default: 'main'
+        type: string
 
 jobs:
   release-please:
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -34,13 +42,15 @@ jobs:
 
   publish:
     needs: release-please
-    if: needs.release-please.outputs.release_created == 'true'
+    if: always() && (needs.release-please.outputs.release_created == 'true' || github.event_name == 'workflow_dispatch')
     runs-on: ubuntu-latest
     permissions:
       contents: write # Required for OIDC authentication
       id-token: write
     steps:
       - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
+        with:
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.ref || '' }}
       - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
