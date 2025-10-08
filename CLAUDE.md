@@ -140,12 +140,48 @@ Configure on npmjs.com package settings → "Trusted Publisher":
 
 # ACL Method Definitions
 
-project: {
-  test: exec("pnpm test"),
-  typecheck: exec("pnpm run typecheck"),
-  start: exec("pnpm start"),
-  build: exec("pnpm run build"),
-  format: exec("pnpm format"),
-  inspect: exec("pnpm inspect"),
-  inspectDist: exec("pnpm inspect:dist")
+```acl
+obj spec = "ACL spec file; ACL.md"
+
+obj project = "MCP server implementation that provides ACL support"
+
+fn project.test(): void {
+  description: "Run tests using Vitest"
+  action: exec("pnpm test")
 }
+
+fn project.typecheck(): void {
+  description: "Type check using TypeScript"
+  action: exec("pnpm run typecheck")
+}
+
+fn project.start(): void {
+  description: "Start development server using tsx"
+  action: exec("pnpm start")
+}
+
+fn project.build(): void {
+  description: "Build for production (ESM and CJS bundles)"
+  action: exec("pnpm run build")
+}
+
+fn project.format(): void {
+  description: "Format code using Prettier"
+  action: exec("pnpm format")
+}
+
+fn project.inspect(): void {
+  description: "Inspect MCP server in development mode"
+  action: exec("pnpm inspect")
+}
+
+fn project.inspectDist(): void {
+  description: "Inspect built MCP server"
+  action: exec("pnpm inspect:dist")
+}
+
+fn finish(task): void {
+  description: "Complete task with cleanup, tests, commit, and PR"
+  action: tidyUp() && test() && git.commit(task).push() && github.pr(task)
+}
+```
