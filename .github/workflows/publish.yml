@@ -13,10 +13,6 @@ on:
       - '.github/**'
       - '!.github/workflows/publish.yml'
 
-permissions:
-  id-token: write  # Required for OIDC authentication
-  contents: read
-
 jobs:
   release-please:
     runs-on: ubuntu-latest
@@ -40,13 +36,15 @@ jobs:
     needs: release-please
     if: needs.release-please.outputs.release_created == 'true'
     runs-on: ubuntu-latest
+    permissions:
+      contents: write # Required for OIDC authentication
+      id-token: write
     steps:
       - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
       - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           registry-url: 'https://registry.npmjs.org'
-          cache: 'pnpm'
           scope: '@lacolaco'
       - name: Upgrade npm for OIDC support
         run: npm install -g npm@latest
