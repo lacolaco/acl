@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.2](https://github.com/lacolaco/acl/compare/v1.0.1...v1.0.2) (2025-10-08)
+
+
+### Bug Fixes
+
+* **ci:** remove npm upgrade step to avoid permission errors ([#6](https://github.com/lacolaco/acl/issues/6)) ([f9e4a8d](https://github.com/lacolaco/acl/commit/f9e4a8d5294fb99d8814e81a0ab7008ccc7ee42a))
+
 ## [1.0.1](https://github.com/lacolaco/acl/compare/v1.0.0...v1.0.1) (2025-10-08)
 
 
