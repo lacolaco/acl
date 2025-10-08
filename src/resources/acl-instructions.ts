@@ -1,12 +1,5 @@
-import { readFile } from "node:fs/promises";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-
-function getDirname() {
-  // tsup shims `import.meta.url` for CJS output, so this works in both CJS and ESM.
-  return path.dirname(fileURLToPath(import.meta.url));
-}
+import { getAclSpecification } from "../utils/acl-path.js";
 
 export function registerInstructionsResource(server: McpServer): void {
   server.registerResource(
@@ -19,8 +12,7 @@ export function registerInstructionsResource(server: McpServer): void {
       mimeType: "text/markdown",
     },
     async () => {
-      const aclPath = path.join(getDirname(), "..", "..", "ACL.md");
-      const text = await readFile(aclPath, "utf-8");
+      const text = await getAclSpecification();
       return {
         contents: [
           {

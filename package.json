@@ -32,7 +32,8 @@
   },
   "packageManager": "pnpm@10.18.1",
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.19.1"
+    "@modelcontextprotocol/sdk": "^1.19.1",
+    "find-up": "^8.0.0"
   },
   "devDependencies": {
     "@modelcontextprotocol/inspector": "0.17.0",
