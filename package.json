@@ -3,7 +3,8 @@
   "version": "0.0.1",
   "description": "",
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "provenance": true
   },
   "main": "./dist/main.cjs",
   "module": "./dist/main.mjs",
