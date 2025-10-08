@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.3](https://github.com/lacolaco/acl/compare/v1.3.2...v1.3.3) (2025-10-08)
+
+
+### Bug Fixes
+
+* add cwd option to findUp for correct ACL.md resolution in npx environment ([#32](https://github.com/lacolaco/acl/issues/32)) ([f1c713b](https://github.com/lacolaco/acl/commit/f1c713b6286b612ce3a76a6f0d38d7137042b093))
+
 ## [1.3.2](https://github.com/lacolaco/acl/compare/v1.3.1...v1.3.2) (2025-10-08)
 
 
