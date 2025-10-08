@@ -109,7 +109,6 @@ scope.action(details)
 - `ACL` - System management (init, load, scan, list)
 - `project` - Current project context
 - `session` - Current conversation
-- `spec` - ACL specification file
 
 ### Declaration Syntax
 - `obj objectName = "description"` - Declare objects

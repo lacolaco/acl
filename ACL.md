@@ -309,7 +309,6 @@ ACL.list()                              # See available methods
 Available ACL Definitions:
 
 Objects:
-  spec = "ACL spec file; ACL.md"
   project = "MCP server implementation that provides ACL support"
 
 Global Functions:
@@ -501,15 +500,11 @@ operation > target
 1. Evaluate left-side operation completely
 2. Pass the result (return value or output) as input to the right-side target
 3. If target is a function, call it with the result as argument
-4. If target is a file/identifier (like `spec`), apply changes to that target
+4. If target is a property or identifier, apply changes to that target
 
 **Examples**:
 
 ```acl
-delete(":= operator").instead("obj and fn keywords") > spec
-# 1. Execute delete().instead() chain, producing modification instructions
-# 2. Apply those modifications to the spec (ACL.md)
-
 fix("type errors") > project.note()
 # 1. Execute fix("type errors"), producing a summary
 # 2. Call project.note() with that summary
@@ -522,7 +517,6 @@ session.insights() > note()
 **Target Types**:
 
 - **Function call**: `result > functionName()` - calls function with result
-- **File identifier**: `result > spec` - applies result to named file
 - **Property access**: `result > object.property` - sets property value
 
 ### Alert System
@@ -814,8 +808,6 @@ obj objectName = "description"
 obj api = "API server instance"
 
 obj project = "Current project context with build and deployment methods"
-
-obj spec = "ACL specification file; ACL.md"
 ```
 
 **Stored as** in CLAUDE.md:
@@ -986,7 +978,6 @@ All definitions using `obj` and `fn` keywords are stored in the CLAUDE.md ACL Me
 - `then(action)` - Promise success handler
 - `catch(action)` - Promise error handler
 - `finally(action)` - Promise cleanup handler
-- `spec` - File identifier for ACL.md
 - `void` - Return type indicating no return value
 - `any` - Return type for dynamic values
 - `string`, `number`, `object`, `array` - Return type annotations
