@@ -33,9 +33,6 @@ importers:
       vitest:
         specifier: ^3.2.4
         version: 3.2.4(@types/node@24.7.0)(tsx@4.20.6)
-      zod:
-        specifier: ^3.25.76
-        version: 3.25.76
 
 packages:
 
