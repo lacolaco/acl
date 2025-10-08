@@ -16,8 +16,10 @@
   "bin": {
     "acl-mcp-server": "./dist/main.js"
   },
+  "type": "module",
   "scripts": {
-    "test": "vitest",
+    "test": "pnpm run typecheck && vitest",
+    "typecheck": "tsc --noEmit",
     "start": "tsx src/main.ts",
     "build": "tsup src/main.ts --format esm,cjs --dts",
     "format": "prettier --cache --write .",
@@ -43,5 +45,10 @@
     "typescript": "^5.9.3",
     "vitest": "^3.2.4",
     "zod": "^3.25.76"
+  },
+  "tsup": {
+    "clean": true,
+    "dts": true,
+    "shims": true
   }
 }

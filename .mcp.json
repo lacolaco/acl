@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "acl": {
+      "type": "stdio",
+      "command": "node",
+      "args": [
+        "dist/main.js"
+      ],
+      "env": {}
+    }
+  }
+}

@@ -1,6 +1,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import { z } from "zod";
+import { helloTool } from "./tools/hello.js";
+import { getAclSpecificationTool } from "./tools/get-acl-specification.js";
 
 const server = new McpServer({
   name: "acl-mcp-server",
@@ -10,20 +11,11 @@ const server = new McpServer({
   },
 });
 
+server.registerTool(helloTool.name, helloTool.config, helloTool.callback);
 server.registerTool(
-  "hello",
-  {
-    title: "Hello Tool",
-    description: "Says hello",
-    inputSchema: {
-      name: z.string().describe("The name to say hello to"),
-    },
-  },
-  async ({ name }) => {
-    return {
-      content: [{ type: "text", text: `Hello, ${name}!` }],
-    };
-  },
+  getAclSpecificationTool.name,
+  getAclSpecificationTool.config,
+  getAclSpecificationTool.callback,
 );
 
 const transport = new StdioServerTransport();

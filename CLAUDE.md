@@ -33,31 +33,64 @@ pnpm inspect:dist
 ### MCP Server Structure
 
 - **Entry point**: `src/main.ts` - Configures and starts the MCP server with stdio transport
-- **Test file**: `src/main.test.ts` - Uses InMemoryTransport for testing MCP client-server communication
+- **Tools directory**: `src/tools/` - Modular tool definitions
+  - Each tool is defined as a pure object with `name`, `config`, and `callback`
+  - Tools export constants (e.g., `helloTool`, `getAclSpecificationTool`)
+- **Test files**:
+  - `src/main.test.ts` - Integration tests using InMemoryTransport
+  - `src/tools/*.test.ts` - Unit tests for individual tools
 - **Build output**: `dist/` directory contains:
   - `main.js` - Executable CJS bundle (bin entry point)
   - `main.mjs` - ESM bundle
   - `main.d.ts` and `main.d.mts` - TypeScript declarations
 
-### Tool Registration Pattern
+### Tool Definition Pattern
 
-Tools are registered using `server.registerTool()` with:
-1. Tool name (string identifier)
-2. Configuration object with:
-   - `title`: Human-readable name
-   - `description`: Tool description
-   - `inputSchema`: Zod schema for input validation
-3. Handler function that returns `{ content: [{ type: "text", text: string }] }`
+Tools are defined as pure objects in `src/tools/`:
+
+```typescript
+import type { ToolCallback } from "@modelcontextprotocol/sdk/server/mcp.js";
+
+const inputSchema = {
+  name: z.string().describe("Parameter description"),
+};
+
+export const myTool = {
+  name: "tool_name",
+  config: {
+    title: "Tool Title",
+    description: "Tool description",
+    inputSchema,
+  },
+  callback: (async ({ name }) => {
+    return {
+      content: [{ type: "text", text: `Result: ${name}` }],
+    };
+  }) satisfies ToolCallback<typeof inputSchema>,
+} as const;
+```
+
+Then registered in `main.ts`:
+
+```typescript
+server.registerTool(myTool.name, myTool.config, myTool.callback);
+```
 
 ### Testing Pattern
 
-Tests use `InMemoryTransport.createLinkedPair()` to create connected client-server transports without requiring stdio communication. This allows for synchronous testing of MCP server behavior.
+- **Unit tests** (`src/tools/*.test.ts`): Test tool logic directly by calling the callback function
+- **Integration tests** (`src/main.test.ts`): Test MCP protocol communication using `InMemoryTransport.createLinkedPair()`
+- **Type checking**: `pnpm test` runs `tsc --noEmit` before tests to catch type errors
 
 ## Build System
 
 - **TypeScript**: Configured for NodeNext module system targeting ES2022
-- **Build tool**: tsup for bundling (creates both ESM and CJS outputs)
-- **Package manager**: pnpm (v10.8.1)
+- **Build tool**: tsup for bundling
+  - Creates both ESM (`.mjs`) and CJS (`.cjs`) outputs
+  - `shims: true` in tsup config enables `import.meta.url` in CJS
+  - `clean: true` cleans dist directory before build
+- **Package manager**: pnpm (v10.14.0)
+- **Package type**: `"type": "module"` - ESM by default
 
 ## ACL Integration
 
@@ -109,6 +142,7 @@ Configure on npmjs.com package settings → "Trusted Publisher":
 
 project: {
   test: exec("pnpm test"),
+  typecheck: exec("pnpm run typecheck"),
   start: exec("pnpm start"),
   build: exec("pnpm run build"),
   format: exec("pnpm format"),
