@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.2](https://github.com/lacolaco/acl/compare/v1.3.1...v1.3.2) (2025-10-08)
+
+
+### Bug Fixes
+
+* improve ACL.md path resolution and add caching ([#30](https://github.com/lacolaco/acl/issues/30)) ([154b502](https://github.com/lacolaco/acl/commit/154b502f3605eb96f42c481778afabbafb13c79c))
+
 ## [1.3.1](https://github.com/lacolaco/acl/compare/v1.3.0...v1.3.1) (2025-10-08)
 
 
