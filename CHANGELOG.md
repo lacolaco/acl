@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.3.0](https://github.com/lacolaco/acl/compare/v1.2.0...v1.3.0) (2025-10-08)
+
+
+### Features
+
+* add build check to CI workflow and cleanup dependencies ([#24](https://github.com/lacolaco/acl/issues/24)) ([ee41073](https://github.com/lacolaco/acl/commit/ee410734647488120a66a616bec4dd2155dc3e12))
+
+
+### Bug Fixes
+
+* update package.json bin to single executable format and improve begin() workflow ([#26](https://github.com/lacolaco/acl/issues/26)) ([130cf62](https://github.com/lacolaco/acl/commit/130cf62ecb074f5ca5a58d017aa5df5dd305d5ec))
+
 ## [1.2.0](https://github.com/lacolaco/acl/compare/v1.1.0...v1.2.0) (2025-10-08)
 
 
