@@ -63,6 +63,29 @@ Tests use `InMemoryTransport.createLinkedPair()` to create connected client-serv
 
 This project implements the Agent Communication Language (ACL) specification defined in `ACL.md`. The MCP server acts as a bridge between AI agents and ACL commands, enabling structured agent communication.
 
+## Publishing
+
+This package uses **npm Trusted Publishing** with OIDC authentication for secure package publishing without long-lived tokens.
+
+### Setup Requirements
+
+1. **npm Configuration** (on npmjs.com):
+   - Navigate to package settings → "Trusted Publisher"
+   - Configure:
+     - Organization: `lacolaco`
+     - Repository: `acl`
+     - Workflow: `.github/workflows/publish.yml`
+
+2. **Publishing Process**:
+   - Create and push a git tag: `git tag v0.0.1 && git push --tags`
+   - GitHub Actions workflow automatically builds, tests, and publishes
+   - Uses OIDC for authentication (no secrets required)
+
+3. **Requirements**:
+   - npm 11.5.1+ (automatically upgraded in workflow)
+   - `id-token: write` permission in workflow
+   - `publishConfig.access: "public"` in package.json
+
 ## Key Dependencies
 
 - `@modelcontextprotocol/sdk`: Core MCP server/client implementation
