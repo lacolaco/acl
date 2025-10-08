@@ -1,12 +1,5 @@
-import { readFile } from "node:fs/promises";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
 import type { ToolCallback } from "@modelcontextprotocol/sdk/server/mcp.js";
-
-function getDirname() {
-  // tsup shims `import.meta.url` for CJS output, so this works in both CJS and ESM.
-  return path.dirname(fileURLToPath(import.meta.url));
-}
+import { getAclSpecification } from "../utils/acl-path.js";
 
 export const getAclSpecificationTool = {
   name: "get_acl_specification",
@@ -34,8 +27,7 @@ Get the complete Agent Communication Language (ACL) specification document. ACL 
     inputSchema: {},
   },
   callback: (async () => {
-    const aclPath = path.join(getDirname(), "..", "..", "ACL.md");
-    const aclContent = await readFile(aclPath, "utf-8");
+    const aclContent = await getAclSpecification();
     return {
       content: [{ type: "text", text: aclContent }],
     };

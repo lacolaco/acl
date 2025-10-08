@@ -138,8 +138,16 @@ fn refactor(targets, direction): void {
 }
 
 fn think(issue): string {
-  description: "Analyze without modifying files"
-  action: "Read-only analysis, provide insights and recommendations without making any changes"
+  description: "Analyze issue with read-only operations; strictly forbidden to modify any files or execute commands"
+  action: [
+    "Use ONLY read-only tools (Read, Grep, Glob, WebFetch) to investigate",
+    "Analyze the problem and provide detailed insights",
+    "Present recommendations and potential solutions to user",
+    "FORBIDDEN: Edit, Write, NotebookEdit, Bash, or any state-modifying operations",
+    "FORBIDDEN: Making any changes to files, executing commands, or taking corrective actions",
+    "REQUIRED: Wait for explicit user instruction (fix, refactor, begin, etc.) before any action"
+  ]
+  returns: "Analysis, insights, and recommendations as text output only"
 }
 
 fn test(pattern?): object {
@@ -198,7 +206,7 @@ fix("failing unit tests")
 # Safe refactoring
 refactor("auth module", "separate concerns")
 
-# Analysis only (no changes)
+# Read-only analysis (strictly no file modifications or command execution)
 think("optimal caching strategy")
 
 # Run tests
