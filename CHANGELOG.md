@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.0](https://github.com/lacolaco/acl/compare/v1.1.0...v1.2.0) (2025-10-08)
+
+
+### Features
+
+* enhance MCP server discoverability with comprehensive instructions and resources ([#22](https://github.com/lacolaco/acl/issues/22)) ([3366a51](https://github.com/lacolaco/acl/commit/3366a51ad00b0ddcf70ef6349839370cb00140fc))
+
 ## [1.1.0](https://github.com/lacolaco/acl/compare/v1.0.2...v1.1.0) (2025-10-08)
 
 
