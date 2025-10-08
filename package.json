@@ -26,6 +26,10 @@
   },
   "keywords": [],
   "author": "",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lacolaco/acl.git"
+  },
   "packageManager": "pnpm@10.14.0",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.19.1"
