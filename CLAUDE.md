@@ -82,6 +82,13 @@ server.registerTool(myTool.name, myTool.config, myTool.callback);
 - **Integration tests** (`src/main.test.ts`): Test MCP protocol communication using `InMemoryTransport.createLinkedPair()`
 - **Type checking**: `pnpm test` runs `tsc --noEmit` before tests to catch type errors
 
+**Test Adaptation Pattern**: When modifying ACL.md specification:
+
+1. Identify tests that validate spec content (e.g., `get-acl-specification.test.ts`)
+2. Update test assertions to match new spec structure
+3. Replace removed sections with new equivalent sections (e.g., "Language Specification" → "## 1. Introduction", "Built-in Objects" → "## 4. Objects")
+4. Run tests to verify changes are complete
+
 ## Build System
 
 - **TypeScript**: Configured for NodeNext module system targeting ES2022
@@ -120,6 +127,7 @@ This package uses **automated releases** with release-please and **npm Trusted P
 ### npm Trusted Publisher Setup
 
 Configure on npmjs.com package settings → "Trusted Publisher":
+
 - Organization: `lacolaco`
 - Repository: `acl`
 - Workflow: `.github/workflows/publish.yml`
@@ -142,6 +150,27 @@ Configure on npmjs.com package settings → "Trusted Publisher":
 
 ```acl
 obj spec = "ACL spec file; ACL.md"
+
+fn spec.remove(identifiers): void {
+  description: "Remove definitions from ACL.md"
+  action: [
+    "Read ACL.md to locate all references to identifiers",
+    "Remove method definitions, examples, and documentation",
+    "Update related sections (ACL.list() output, etc.)",
+    "Verify consistency across entire spec"
+  ]
+}
+
+fn spec.add(identifier, description): void {
+  description: "Add new definition to ACL.md"
+  action: [
+    "Determine appropriate section in ACL.md",
+    "Add method definition with description",
+    "Update examples section",
+    "Update ACL.list() output if applicable",
+    "Verify consistency"
+  ]
+}
 
 obj project = "MCP server implementation that provides ACL support"
 
@@ -180,8 +209,37 @@ fn project.inspectDist(): void {
   action: exec("pnpm inspect:dist")
 }
 
+fn begin(goal): task {
+  description: "Begin working on task with git branch and TODO planning; pairs with finish(task)"
+  action: [
+    "Create dedicated git branch for the task",
+    "Draft initial TODO list based on goal",
+    "Request user agreement on approach"
+  ]
+  returns: "Task object that can be passed to finish(task)"
+}
+
 fn finish(task): void {
   description: "Complete task with cleanup, tests, commit, and PR"
-  action: tidyUp() && test() && git.commit(task).push() && github.pr(task)
+  action: [
+    "Clean up and verify all changes are correct",
+    "Run pnpm test to ensure all tests pass",
+    "Stage all relevant files with git add",
+    "Create conventional commit with detailed message using git commit",
+    "Push to remote branch with git push",
+    "Create pull request with gh pr create (include summary and test plan)",
+    "Rebase on main if requested with git rebase origin/main",
+    "Force push rebased branch if needed with git push -f"
+  ]
+}
+
+fn object.detail(): void {
+  description: "Add detailed definitions to object"
+  action: [
+    "Read current object definition in ACL.md",
+    "Expand description with comprehensive details",
+    "Convert action to multi-step array format",
+    "Add returns field with detailed description"
+  ]
 }
 ```
