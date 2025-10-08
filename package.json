@@ -13,9 +13,7 @@
     "dist",
     "ACL.md"
   ],
-  "bin": {
-    "acl-mcp-server": "./dist/main.js"
-  },
+  "bin": "./dist/main.js",
   "type": "module",
   "scripts": {
     "test": "pnpm run typecheck && vitest",
