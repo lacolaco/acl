@@ -2,26 +2,15 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { describe, it, expect, beforeEach } from "vitest";
 import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
 import { Client as McpClient } from "@modelcontextprotocol/sdk/client/index.js";
-import { getAclSpecificationTool } from "./tools/get-acl-specification.js";
+import { createMcpServer } from "./mcp-server.js";
 
 describe("MCP Server Integration", () => {
   let server: McpServer;
 
   beforeEach(() => {
-    server = new McpServer({
-      name: "acl-mcp-server",
-      version: "1.0.0",
-      capabilities: {
-        tools: true,
-      },
-    });
-
-    server.registerTool(
-      getAclSpecificationTool.name,
-      getAclSpecificationTool.config,
-      getAclSpecificationTool.callback,
-    );
+    server = createMcpServer();
   });
+
   it("should call get_acl_specification tool via MCP protocol", async () => {
     const [clientTransport, serverTransport] =
       InMemoryTransport.createLinkedPair();
