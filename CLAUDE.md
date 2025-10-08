@@ -67,6 +67,8 @@ This project implements the Agent Communication Language (ACL) specification def
 
 This package uses **automated releases** with release-please and **npm Trusted Publishing** with OIDC authentication.
 
+**Note**: pnpm version is specified in `package.json` (`packageManager` field), so it should not be duplicated in workflow files. The `pnpm/action-setup` action automatically reads this field.
+
 ### Publishing Process
 
 1. **Commit with Conventional Commits**:
