@@ -103,6 +103,13 @@ server.registerTool(myTool.name, myTool.config, myTool.callback);
 
 This project implements the Agent Communication Language (ACL) specification defined in `ACL.md`. The MCP server acts as a bridge between AI agents and ACL commands, enabling structured agent communication.
 
+**Agent-Agnostic Specification**: The ACL specification in `ACL.md` uses generic "instruction file" terminology to support multiple AI agents (Claude Code, Gemini CLI, GitHub Copilot, etc.). Each agent uses its own native instruction file:
+- Claude Code → `CLAUDE.md`
+- Gemini CLI → `GEMINI.md`
+- Multi-agent projects → `AGENTS.md` (neutral option)
+
+This repository uses `CLAUDE.md` as its instruction file for Claude Code.
+
 ## Publishing
 
 This package uses **automated releases** with release-please and **npm Trusted Publishing** with OIDC authentication.
