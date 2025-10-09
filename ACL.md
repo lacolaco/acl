@@ -37,6 +37,29 @@ ACL is for:
 - Knowledge management
 - Error handling and recovery
 
+### Glossary
+
+**INSTRUCTION_FILE**
+: The agent's instruction file used to store configurations and ACL method definitions. This is an agent-specific file (e.g., `CLAUDE.md` for Claude Code, `GEMINI.md` for Gemini CLI, or `AGENTS.md` for multi-agent projects).
+
+**USER_INSTRUCTION_FILE**
+: User-level instruction file that persists across all projects. Examples: `~/.claude/CLAUDE.md` (Claude Code), `~/.agents/AGENTS.md` (generic).
+
+**PROJECT_INSTRUCTION_FILE**
+: Project-level instruction file specific to the current project. Examples: `CLAUDE.md`, `GEMINI.md`, `AGENTS.md` (in project root or `.agents/` directory).
+
+**ACL Method Definitions**
+: Custom function and object definitions stored in INSTRUCTION_FILE using `obj` and `fn` keywords within an `acl` codeblock under the `# ACL Method Definitions` section.
+
+**scope**
+: The context where an action takes place (e.g., `project`, `ACL`, `session`). Can be omitted for global functions.
+
+**action**
+: What to do (e.g., `build()`, `test()`, `note()`).
+
+**Agent**
+: An AI assistant (e.g., Claude Code, Gemini CLI, GitHub Copilot) that interprets and executes ACL commands.
+
 ---
 
 ## 2. Core Concept: scope.action(details)
@@ -161,6 +184,7 @@ fn alert(message): void {
     "Immediately stop all current work",
     "Analyze the problem thoroughly",
     "Present detailed analysis to user",
+    "Suggest preventive measures to avoid recurrence",
     "Await explicit user approval before taking any corrective action"
   ]
 }
@@ -176,8 +200,8 @@ fn fetch(url): object {
 }
 
 fn note(message): void {
-  description: "Save to user-level CLAUDE.md"
-  action: "Append message to ~/.claude/CLAUDE.md, persist across all projects"
+  description: "Save to USER_INSTRUCTION_FILE"
+  action: "Append message to USER_INSTRUCTION_FILE, persist across all projects"
 }
 
 fn docs(targets): void {
@@ -254,18 +278,18 @@ obj ACL = "ACL system management; provides initialization, definition loading, s
 fn ACL.init(): void {
   description: "Initialize ACL for current project"
   action: [
-    "Create CLAUDE.md if not exists",
+    "Create PROJECT_INSTRUCTION_FILE if not exists",
     "Add '# ACL Method Definitions' section with ```acl codeblock",
     "Scan project structure for build tools (package.json scripts, Makefile, etc.)",
     "Generate initial obj and fn definitions based on detected tools",
-    "Save definitions to CLAUDE.md ACL Method Definitions section"
+    "Save definitions to PROJECT_INSTRUCTION_FILE's ACL Method Definitions section"
   ]
 }
 
 fn ACL.load(): void {
   description: "Load project's ACL definitions into working context"
   action: [
-    "Read CLAUDE.md file",
+    "Read PROJECT_INSTRUCTION_FILE",
     "Parse ACL Method Definitions section",
     "Extract all obj declarations",
     "Extract all fn definitions (global functions and object methods)",
@@ -278,8 +302,8 @@ fn ACL.scan(): void {
   action: [
     "Scan current project structure",
     "Detect new or changed build tools and scripts",
-    "Compare with existing definitions in CLAUDE.md",
-    "Update CLAUDE.md ACL Method Definitions section with changes",
+    "Compare with existing definitions in PROJECT_INSTRUCTION_FILE",
+    "Update PROJECT_INSTRUCTION_FILE's ACL Method Definitions section with changes",
     "Reload definitions into context"
   ]
 }
@@ -346,9 +370,9 @@ Session Objects:
 obj project = "Current project context; provides access to project-specific build tools, commands, and configurations"
 
 fn project.note(message): void {
-  description: "Save important information to project's CLAUDE.md"
+  description: "Save important information to PROJECT_INSTRUCTION_FILE"
   action: [
-    "Read current CLAUDE.md or .claude/CLAUDE.md",
+    "Read PROJECT_INSTRUCTION_FILE",
     "Append message to appropriate section or create new section",
     "Save file with formatted markdown",
     "Confirm save to user"
@@ -589,11 +613,11 @@ project.build()
 ### Hierarchy
 
 ```
-User Level (~/.claude/CLAUDE.md)
+User Level (USER_INSTRUCTION_FILE)
   ↓ Personal preferences, coding standards
   Managed via: note()
 
-Project Level (.claude/CLAUDE.md or CLAUDE.md)
+Project Level (PROJECT_INSTRUCTION_FILE)
   ↓ Project conventions, architecture
   Managed via: project.note()
 
@@ -604,15 +628,15 @@ Session Level (temporary)
 
 ### Persistence
 
-| Method               | File                               | Scope           | Use Case             |
-| -------------------- | ---------------------------------- | --------------- | -------------------- |
-| `note()`             | `~/.claude/CLAUDE.md`              | All projects    | Personal preferences |
-| `project.note()`     | `.claude/CLAUDE.md` or `CLAUDE.md` | Current project | Project conventions  |
-| `session.insights()` | Return value                       | Temporary       | Extract learnings    |
+| Method               | File Examples                                   | Scope           | Use Case             |
+| -------------------- | ----------------------------------------------- | --------------- | -------------------- |
+| `note()`             | `CLAUDE.md`, `GEMINI.md`, `AGENTS.md` (user)    | All projects    | Personal preferences |
+| `project.note()`     | `CLAUDE.md`, `GEMINI.md`, `AGENTS.md` (project) | Current project | Project conventions  |
+| `session.insights()` | Return value                                    | Temporary       | Extract learnings    |
 
 ### Method Definitions
 
-Project CLAUDE.md contains ACL method definitions within an `acl` codeblock:
+PROJECT_INSTRUCTION_FILE contains ACL method definitions within an `acl` codeblock:
 
 ````markdown
 # ACL Method Definitions
@@ -781,7 +805,7 @@ finish("fix login bug")
 
 ### Method Safety
 
-- Remove dangerous method definitions from CLAUDE.md
+- Remove dangerous method definitions from INSTRUCTION_FILE
 - Common: disable production deploys, destructive operations
 
 ---
@@ -810,7 +834,7 @@ obj api = "API server instance"
 obj project = "Current project context with build and deployment methods"
 ```
 
-**Stored as** in CLAUDE.md:
+**Stored in INSTRUCTION_FILE:**
 ```acl
 obj objectName = "description"
 ```
@@ -851,7 +875,7 @@ fn project.verify(): void {
 }
 ```
 
-**Stored as** in CLAUDE.md:
+**Stored in INSTRUCTION_FILE:**
 ```acl
 fn objectName.methodName(parameters): returnType {
   description: "..."
@@ -916,7 +940,7 @@ fn review(target): string {
 }
 ```
 
-**Stored as** in CLAUDE.md:
+**Stored in INSTRUCTION_FILE:**
 
 ```acl
 fn functionName(parameters): returnType {
@@ -927,9 +951,9 @@ fn functionName(parameters): returnType {
 
 **Note**: The `obj` and `fn` keywords are the standard syntax for ACL definitions.
 
-### CLAUDE.md Format
+### INSTRUCTION_FILE Format
 
-All definitions are stored in the ACL Method Definitions section:
+All definitions are stored in the ACL Method Definitions section of INSTRUCTION_FILE:
 
 ````markdown
 # ACL Method Definitions
@@ -959,7 +983,7 @@ fn finish(task): void {
 
 **Behavior**:
 
-All definitions using `obj` and `fn` keywords are stored in the CLAUDE.md ACL Method Definitions section.
+All definitions using `obj` and `fn` keywords are stored in INSTRUCTION_FILE's ACL Method Definitions section.
 
 ---
 
@@ -986,11 +1010,11 @@ All definitions using `obj` and `fn` keywords are stored in the CLAUDE.md ACL Me
 
 ## 11. File Locations
 
-| File              | Location                           | Purpose                 |
-| ----------------- | ---------------------------------- | ----------------------- |
-| User CLAUDE.md    | `~/.claude/CLAUDE.md`              | User-wide configuration |
-| Project CLAUDE.md | `.claude/CLAUDE.md` or `CLAUDE.md` | Project configuration   |
-| ACL definitions   | Within CLAUDE.md files             | Method definitions      |
+| File                      | Example Locations                     | Purpose                 |
+| ------------------------- | ------------------------------------- | ----------------------- |
+| USER_INSTRUCTION_FILE     | `CLAUDE.md`, `GEMINI.md`, `AGENTS.md` | User-wide configuration |
+| PROJECT_INSTRUCTION_FILE  | `CLAUDE.md`, `GEMINI.md`, `AGENTS.md` | Project configuration   |
+| ACL definitions           | Within INSTRUCTION_FILE               | Method definitions      |
 
 ---
 

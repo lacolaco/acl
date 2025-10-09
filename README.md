@@ -102,7 +102,7 @@ scope.action(details)
 - `think(issue)` - Read-only analysis (no file modifications)
 - `test(pattern?)` - Run tests
 - `alert(message)` - Alert about violations
-- `note(message)` - Save to user-level CLAUDE.md
+- `note(message)` - Save to USER_INSTRUCTION_FILE
 - `docs(targets)` - Enhance documentation
 
 ### Built-in Objects
