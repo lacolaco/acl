@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.4.0](https://github.com/lacolaco/acl/compare/v1.3.4...v1.4.0) (2025-10-09)
+
+
+### Features
+
+* make ACL specification agent-agnostic ([#39](https://github.com/lacolaco/acl/issues/39)) ([a0b8690](https://github.com/lacolaco/acl/commit/a0b8690d582dd281fbab2376e27c8eebb84117ea)), closes [#38](https://github.com/lacolaco/acl/issues/38)
+
 ## [1.3.4](https://github.com/lacolaco/acl/compare/v1.3.3...v1.3.4) (2025-10-08)
 
 
