@@ -45,11 +45,11 @@ ACL is for:
 **USER_INSTRUCTION_FILE**
 : User-level instruction file that persists across all projects. Examples: `~/.claude/CLAUDE.md` (Claude Code), `~/.agents/AGENTS.md` (generic).
 
-**PROJECT_INSTRUCTION_FILE**
-: Project-level instruction file specific to the current project. Examples: `CLAUDE.md`, `GEMINI.md`, `AGENTS.md` (in project root or `.agents/` directory).
+**.acl/config.md**
+: Project-level configuration file for ACL method definitions. Located at `.acl/config.md` in the project root. This is the preferred location for project-specific ACL objects and functions.
 
 **ACL Method Definitions**
-: Custom function and object definitions stored in INSTRUCTION_FILE using `obj` and `fn` keywords within an `acl` codeblock under the `# ACL Method Definitions` section.
+: Custom function and object definitions stored in `.acl/config.md` using `obj` and `fn` keywords within an `<acl:definitions>` XML tag.
 
 **scope**
 : The context where an action takes place (e.g., `project`, `ACL`, `session`). Can be omitted for global functions.
@@ -279,19 +279,19 @@ obj ACL = "ACL system management; provides initialization, definition loading, s
 fn ACL.init(): void {
   description: "Initialize ACL for current project"
   action: [
-    "Create PROJECT_INSTRUCTION_FILE if not exists",
-    "Add '# ACL Method Definitions' section with ```acl codeblock",
+    "Create .acl/config.md if not exists",
+    "Add <acl:definitions> XML tag wrapper",
     "Scan project structure for build tools (package.json scripts, Makefile, etc.)",
     "Generate initial obj and fn definitions based on detected tools",
-    "Save definitions to PROJECT_INSTRUCTION_FILE's ACL Method Definitions section"
+    "Save definitions inside <acl:definitions> tags in .acl/config.md"
   ]
 }
 
 fn ACL.load(): void {
   description: "Load project's ACL definitions into working context"
   action: [
-    "Read PROJECT_INSTRUCTION_FILE",
-    "Parse ACL Method Definitions section",
+    "Read .acl/config.md",
+    "Parse content within <acl:definitions> tags",
     "Extract all obj declarations",
     "Extract all fn definitions (global functions and object methods)",
     "Load definitions into agent's working memory for command execution"
@@ -303,8 +303,8 @@ fn ACL.scan(): void {
   action: [
     "Scan current project structure",
     "Detect new or changed build tools and scripts",
-    "Compare with existing definitions in PROJECT_INSTRUCTION_FILE",
-    "Update PROJECT_INSTRUCTION_FILE's ACL Method Definitions section with changes",
+    "Compare with existing definitions in .acl/config.md",
+    "Update definitions within <acl:definitions> tags in .acl/config.md",
     "Reload definitions into context"
   ]
 }
@@ -330,7 +330,7 @@ ACL.list()                              # See available methods
 
 **ACL.list() Output Example**:
 
-This example shows both built-in functions and user-defined functions from INSTRUCTION_FILE.
+This example shows both built-in functions and user-defined functions from `.acl/config.md`.
 
 ```
 Available ACL Definitions:
@@ -352,7 +352,7 @@ Global Functions:
   review(target): string
   exec(command): number
 
-  # User-defined functions (from INSTRUCTION_FILE)
+  # User-defined functions (from .acl/config.md)
   begin(goal): void
   finish(task): void
 
@@ -376,9 +376,9 @@ Session Objects:
 obj project = "Current project context; provides access to project-specific build tools, commands, and configurations"
 
 fn project.note(message): void {
-  description: "Save important information to PROJECT_INSTRUCTION_FILE"
+  description: "Save important information to INSTRUCTION_FILE"
   action: [
-    "Read PROJECT_INSTRUCTION_FILE",
+    "Read INSTRUCTION_FILE (CLAUDE.md, GEMINI.md, etc.)",
     "Append message to appropriate section or create new section",
     "Save file with formatted markdown",
     "Confirm save to user"
@@ -623,9 +623,13 @@ User Level (USER_INSTRUCTION_FILE)
   ↓ Personal preferences, coding standards
   Managed via: note()
 
-Project Level (PROJECT_INSTRUCTION_FILE)
-  ↓ Project conventions, architecture
+Project Level (INSTRUCTION_FILE)
+  ↓ Project conventions, notes
   Managed via: project.note()
+
+Project Level (.acl/config.md)
+  ↓ ACL method definitions (obj/fn)
+  Managed via: ACL.init(), ACL.scan()
 
 Session Level (temporary)
   ↓ Current conversation insights
@@ -634,20 +638,18 @@ Session Level (temporary)
 
 ### Persistence
 
-| Method               | File Examples                                   | Scope           | Use Case             |
-| -------------------- | ----------------------------------------------- | --------------- | -------------------- |
-| `note()`             | `CLAUDE.md`, `GEMINI.md`, `AGENTS.md` (user)    | All projects    | Personal preferences |
-| `project.note()`     | `CLAUDE.md`, `GEMINI.md`, `AGENTS.md` (project) | Current project | Project conventions  |
-| `session.insights()` | Return value                                    | Temporary       | Extract learnings    |
+| Method               | File Examples                                | Scope           | Use Case             |
+| -------------------- | -------------------------------------------- | --------------- | -------------------- |
+| `note()`             | `~/.claude/CLAUDE.md`, `~/.agents/AGENTS.md` | All projects    | Personal preferences |
+| `project.note()`     | `CLAUDE.md`, `GEMINI.md`, `AGENTS.md`        | Current project | Project conventions  |
+| `session.insights()` | Return value                                 | Temporary       | Extract learnings    |
 
 ### Method Definitions
 
-PROJECT_INSTRUCTION_FILE contains ACL method definitions within an `acl` codeblock:
+`.acl/config.md` contains project-specific ACL method definitions within an `<acl:definitions>` tag:
 
-````markdown
-# ACL Method Definitions
-
-```acl
+```xml
+<acl:definitions>
 obj project = "Current project context"
 
 fn project.build(): void {
@@ -664,13 +666,12 @@ fn project.deploy(): void {
   description: "Deploy the project"
   action: exec("pnpm run deploy")
 }
+</acl:definitions>
 ```
-````
 
 **Format Requirements**:
 
-- Must be wrapped in ` ```acl ` codeblock
-- Section header: `# ACL Method Definitions`
+- Must be wrapped in `<acl:definitions>` XML tags
 
 **Management**:
 
@@ -840,7 +841,7 @@ obj api = "API server instance"
 obj project = "Current project context with build and deployment methods"
 ```
 
-**Stored in INSTRUCTION_FILE:**
+**Stored in .acl/config.md:**
 ```acl
 obj objectName = "description"
 ```
@@ -881,7 +882,7 @@ fn project.verify(): void {
 }
 ```
 
-**Stored in INSTRUCTION_FILE:**
+**Stored in .acl/config.md:**
 ```acl
 fn objectName.methodName(parameters): returnType {
   description: "..."
@@ -946,7 +947,7 @@ readonly fn review(target): string {
 }
 ```
 
-**Stored in INSTRUCTION_FILE:**
+**Stored in .acl/config.md:**
 
 ```acl
 fn functionName(parameters): returnType {
@@ -997,14 +998,12 @@ readonly fn review(target): string {
 
 **Note**: The `obj`, `fn`, and `readonly` keywords are the standard syntax for ACL definitions.
 
-### INSTRUCTION_FILE Format
+### .acl/config.md Format
 
-All definitions are stored in the ACL Method Definitions section of INSTRUCTION_FILE:
+Project-specific ACL definitions are stored in `.acl/config.md` using the `<acl:definitions>` XML tag:
 
-````markdown
-# ACL Method Definitions
-
-```acl
+```xml
+<acl:definitions>
 # Objects
 obj project = "Current project context"
 
@@ -1024,12 +1023,12 @@ fn finish(task): void {
   description: "Complete task with cleanup and PR"
   action: tidyUp() && test() && git.commit(task).push() && github.pr(task)
 }
+</acl:definitions>
 ```
-````
 
 **Behavior**:
 
-All definitions using `obj` and `fn` keywords are stored in INSTRUCTION_FILE's ACL Method Definitions section.
+All project-specific definitions using `obj` and `fn` keywords are wrapped in `<acl:definitions>` tags in `.acl/config.md`.
 
 ---
 
@@ -1057,11 +1056,11 @@ All definitions using `obj` and `fn` keywords are stored in INSTRUCTION_FILE's A
 
 ## 11. File Locations
 
-| File                      | Example Locations                     | Purpose                 |
-| ------------------------- | ------------------------------------- | ----------------------- |
-| USER_INSTRUCTION_FILE     | `CLAUDE.md`, `GEMINI.md`, `AGENTS.md` | User-wide configuration |
-| PROJECT_INSTRUCTION_FILE  | `CLAUDE.md`, `GEMINI.md`, `AGENTS.md` | Project configuration   |
-| ACL definitions           | Within INSTRUCTION_FILE               | Method definitions      |
+| File                  | Example Locations                                    | Purpose                     |
+| --------------------- | ---------------------------------------------------- | --------------------------- |
+| USER_INSTRUCTION_FILE | `~/.claude/CLAUDE.md`, `~/.agents/AGENTS.md`         | User-wide preferences       |
+| INSTRUCTION_FILE      | `CLAUDE.md`, `GEMINI.md`, `AGENTS.md` (project root) | Agent-specific instructions |
+| .acl/config.md        | `.acl/config.md` (project root)                      | Project ACL definitions     |
 
 ---
 
