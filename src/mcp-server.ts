@@ -39,16 +39,21 @@ ACL Objects:
 * \`session\`: Current conversation (summary, insights)
 * \`spec\`: ACL specification file (add, remove methods)
 
-Global Functions:
-* \`begin\`, \`finish\`: Task lifecycle management
+Global Functions (Built-in):
 * \`fix\`, \`refactor\`, \`test\`: Code quality operations
+* \`think\`, \`review\`: Read-only analysis operations
 * \`note\`, \`docs\`: Knowledge management
 * \`alert\`, \`retry\`: Error handling
+* \`fetch\`: Fetch web resources
+* \`exec\`: Execute shell commands
+
+Note: Functions like \`begin\`, \`finish\` are examples of user-defined functions in INSTRUCTION_FILE, not built-in functions.
 
 Declaration Syntax:
 * \`obj objectName = "description"\`: Declare an object
 * \`fn functionName(params): returnType { ... }\`: Define a function
-* CLAUDE.md: Project-specific ACL method definitions stored in \`acl\` codeblock under "# ACL Method Definitions" section
+* \`readonly fn functionName(params): returnType { ... }\`: Define a read-only function
+* INSTRUCTION_FILE: Project-specific ACL method definitions stored in \`acl\` codeblock under "# ACL Method Definitions" section
 </Key Concepts>`,
   });
 

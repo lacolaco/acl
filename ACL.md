@@ -57,6 +57,9 @@ ACL is for:
 **action**
 : What to do (e.g., `build()`, `test()`, `note()`).
 
+**readonly**
+: Function modifier indicating the function performs only read-only operations. Readonly functions cannot modify files, execute commands, or change system state. They can only read data, analyze information, and return insights.
+
 **Agent**
 : An AI assistant (e.g., Claude Code, Gemini CLI, GitHub Copilot) that interprets and executes ACL commands.
 
@@ -160,15 +163,13 @@ fn refactor(targets, direction): void {
   ]
 }
 
-fn think(issue): string {
-  description: "Analyze issue with read-only operations; strictly forbidden to modify any files or execute commands"
+readonly fn think(issue): string {
+  description: "Analyze issue with read-only operations"
   action: [
-    "Use ONLY read-only tools (Read, Grep, Glob, WebFetch) to investigate",
+    "Investigate using read-only tools (Read, Grep, Glob, WebFetch)",
     "Analyze the problem and provide detailed insights",
     "Present recommendations and potential solutions to user",
-    "FORBIDDEN: Edit, Write, NotebookEdit, Bash, or any state-modifying operations",
-    "FORBIDDEN: Making any changes to files, executing commands, or taking corrective actions",
-    "REQUIRED: Wait for explicit user instruction (fix, refactor, begin, etc.) before any action"
+    "Wait for explicit user instruction before taking any action"
   ]
   returns: "Analysis, insights, and recommendations as text output only"
 }
@@ -209,9 +210,9 @@ fn docs(targets): void {
   action: "Analyze specified modules/classes/APIs, understand their purpose and usage, add or improve documentation"
 }
 
-fn review(target): string {
-  description: "Code review; focus on analysis, never edit code"
-  action: "Analyze code quality, patterns, architecture, and potential issues. Provide insights on maintainability, performance, security, and best practices. Never modify code."
+readonly fn review(target): string {
+  description: "Code review with analysis only"
+  action: "Analyze code quality, patterns, architecture, and potential issues. Provide insights on maintainability, performance, security, and best practices."
 }
 
 fn exec(command): number {
@@ -230,7 +231,7 @@ fix("failing unit tests")
 # Safe refactoring
 refactor("auth module", "separate concerns")
 
-# Read-only analysis (strictly no file modifications or command execution)
+# Read-only analysis
 think("optimal caching strategy")
 
 # Run tests
@@ -257,7 +258,7 @@ docs("authentication module")
 docs("API endpoints")
 docs("UserService class")
 
-# Code review (analysis only, no edits)
+# Code review (readonly)
 review("src/main.ts")
 review("authentication module")
 
@@ -329,6 +330,8 @@ ACL.list()                              # See available methods
 
 **ACL.list() Output Example**:
 
+This example shows both built-in functions and user-defined functions from INSTRUCTION_FILE.
+
 ```
 Available ACL Definitions:
 
@@ -336,7 +339,7 @@ Objects:
   project = "MCP server implementation that provides ACL support"
 
 Global Functions:
-  begin(goal): void
+  # Built-in functions
   fix(issue): void
   refactor(targets, direction): void
   think(issue): string
@@ -348,6 +351,9 @@ Global Functions:
   docs(targets): void
   review(target): string
   exec(command): number
+
+  # User-defined functions (from INSTRUCTION_FILE)
+  begin(goal): void
   finish(task): void
 
 Object Methods:
@@ -934,9 +940,9 @@ fn deploy(env): void {
 }
 
 # Natural language action
-fn review(target): string {
+readonly fn review(target): string {
   description: "Comprehensive code review with quality metrics"
-  action: "Analyze code quality, patterns, architecture, and potential issues. Focus on analysis only, never edit code. Provide detailed insights on maintainability, performance, and best practices."
+  action: "Analyze code quality, patterns, architecture, and potential issues. Provide detailed insights on maintainability, performance, and best practices."
 }
 ```
 
@@ -949,7 +955,47 @@ fn functionName(parameters): returnType {
 }
 ```
 
-**Note**: The `obj` and `fn` keywords are the standard syntax for ACL definitions.
+#### 4. Readonly Modifier
+
+The `readonly` modifier indicates that a function performs only read-only operations and cannot modify files, execute commands, or change system state.
+
+**Syntax**:
+
+```acl
+readonly fn functionName(parameters): returnType {
+  description: "Human-readable description"
+  action: implementation
+}
+```
+
+**Constraints**:
+
+- **ALLOWED**: Read, Grep, Glob, WebFetch, data analysis, returning information
+- **FORBIDDEN**: Edit, Write, NotebookEdit, Bash (except read-only commands), exec, state modification
+
+**Examples**:
+
+```acl
+# Read-only analysis function
+readonly fn think(issue): string {
+  description: "Analyze issue with read-only operations"
+  action: [
+    "Investigate using read-only tools",
+    "Analyze the problem and provide insights",
+    "Present recommendations to user"
+  ]
+  returns: "Analysis and recommendations"
+}
+
+# Read-only code review
+readonly fn review(target): string {
+  description: "Code review with analysis only"
+  action: "Analyze code quality, patterns, and architecture. Provide insights on maintainability and best practices."
+  returns: "Review insights and recommendations"
+}
+```
+
+**Note**: The `obj`, `fn`, and `readonly` keywords are the standard syntax for ACL definitions.
 
 ### INSTRUCTION_FILE Format
 
@@ -999,6 +1045,7 @@ All definitions using `obj` and `fn` keywords are stored in INSTRUCTION_FILE's A
 
 - `obj` - Object declaration keyword
 - `fn` - Function definition keyword
+- `readonly` - Function modifier for read-only operations
 - `then(action)` - Promise success handler
 - `catch(action)` - Promise error handler
 - `finally(action)` - Promise cleanup handler
