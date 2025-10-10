@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.5.0](https://github.com/lacolaco/acl/compare/v1.4.0...v1.5.0) (2025-10-10)
+
+
+### Features
+
+* add readonly modifier for function definitions ([#41](https://github.com/lacolaco/acl/issues/41)) ([c1ab161](https://github.com/lacolaco/acl/commit/c1ab1615f4ac0e2165cd828cd3eebc028f1d1f30))
+* introduce .acl/config.md with XML tag format for project ACL definitions ([#43](https://github.com/lacolaco/acl/issues/43)) ([c8854cf](https://github.com/lacolaco/acl/commit/c8854cf4089cc01db1f2321f361952796158b20d))
+
 ## [1.4.0](https://github.com/lacolaco/acl/compare/v1.3.4...v1.4.0) (2025-10-09)
 
 
