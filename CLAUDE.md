@@ -145,6 +145,19 @@ Configure on npmjs.com package settings → "Trusted Publisher":
 - `id-token: write` permission for OIDC
 - `publishConfig.provenance: true` in package.json
 
+## Project Conventions
+
+### Commit Types by Scope
+
+- **Renovate configuration** (`renovate.json`): Use `chore:` type
+  - Example: `chore: add 7-day minimum release age to Renovate config`
+  - Rationale: Dependency management configuration is maintenance work, not features
+
+### Dependency Management
+
+- **Renovate Bot**: Configured with `minimumReleaseAge: "7 days"` to allow community feedback before updating
+- Uses shared config: `local>lacolaco/renovate-config`
+
 ## Key Dependencies
 
 - `@modelcontextprotocol/sdk`: Core MCP server/client implementation
