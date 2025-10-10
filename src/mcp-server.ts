@@ -47,13 +47,16 @@ Global Functions (Built-in):
 * \`fetch\`: Fetch web resources
 * \`exec\`: Execute shell commands
 
-Note: Functions like \`begin\`, \`finish\` are examples of user-defined functions in INSTRUCTION_FILE, not built-in functions.
+Note: Functions like \`begin\`, \`finish\` are examples of user-defined functions, not built-in functions.
 
 Declaration Syntax:
 * \`obj objectName = "description"\`: Declare an object
 * \`fn functionName(params): returnType { ... }\`: Define a function
 * \`readonly fn functionName(params): returnType { ... }\`: Define a read-only function
-* INSTRUCTION_FILE: Project-specific ACL method definitions stored in \`acl\` codeblock under "# ACL Method Definitions" section
+
+File Locations:
+* \`.acl/config.md\`: Project-specific ACL method definitions within \`<acl:definitions>\` XML tags
+* INSTRUCTION_FILE: Agent-specific instructions (e.g., CLAUDE.md, GEMINI.md)
 </Key Concepts>`,
   });
 
