@@ -23,7 +23,8 @@ Understanding ACL:
 2. Use \`get_acl_specification\` tool when you need to reference specific ACL features during execution
 
 Working with ACL Commands:
-* When users write ACL expressions like \`begin()\`, \`finish()\`, \`ACL.init()\`, \`ACL.load()\`, reference the specification
+* When users write ACL expressions starting with \`ACL:\` for ACL command blocks
+  * e.g. \`ACL:begin()\`, \`ACL:finish()\`, \`ACL:alert()\`, \`ACL:ACL.init()\`, reference the specification
 * ACL follows \`scope.action(details)\` pattern: e.g., \`project.build()\`, \`spec.add()\`, \`session.summary()\`
 * Support chaining operators: \`&&\` (sequential), \`>\` (output redirection), \`.then/.catch/.finally\` (promise-like)
 

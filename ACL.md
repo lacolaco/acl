@@ -72,11 +72,12 @@ ACL is for:
 All ACL expressions follow a simple pattern:
 
 ```
-scope.action(details)
+ACL:scope.action(details)
 ```
 
 **Components**:
 
+- **ACL**: Prefix indicating ACL protocol
 - **scope**: Where the action takes place (optional for global functions)
 - **action**: What to do
 - **details**: Parameters or context (optional)
@@ -84,11 +85,11 @@ scope.action(details)
 **Examples**:
 
 ```acl
-fix("failing tests")           # Global function (no scope)
-project.build()                # Object method
-test("auth/**")                # Global with parameter
-note("convention")             # Global with parameter
-project.note("convention")     # Object method with parameter
+ACL:fix("failing tests")           # Global function (no scope)
+ACL:project.build()                # Object method
+ACL:test("auth/**")                # Global with parameter
+ACL:note("convention")             # Global with parameter
+ACL:project.note("convention")     # Object method with parameter
 ```
 
 ### Variations
@@ -96,25 +97,25 @@ project.note("convention")     # Object method with parameter
 **Multiple parameters**:
 
 ```acl
-refactor("UserService", "extract authentication")
+ACL:refactor("UserService", "extract authentication")
 ```
 
 **Chaining**:
 
 ```acl
-project.build() && test() && project.deploy()
+ACL:project.build() && test() && project.deploy()
 ```
 
 **Property access**:
 
 ```acl
-fix(test().failures)
+ACL:fix(test().failures)
 ```
 
 **Promise-like handling**:
 
 ```acl
-project.deploy()
+ACL:project.deploy()
   .then("notify team")
   .catch("rollback")
   .finally("cleanup")
@@ -123,7 +124,7 @@ project.deploy()
 **Alert handling**:
 
 ```acl
-alert("stop and analyze the issue")
+ACL:alert("stop and analyze the issue")
 ```
 
 ### Interpretation Rules
@@ -323,9 +324,9 @@ fn ACL.list(): void {
 **Examples**:
 
 ```acl
-ACL.init()                              # Setup project
-ACL.load()                              # Load project ACL definitions
-ACL.list()                              # See available methods
+ACL:ACL.init()                              # Setup project
+ACL:ACL.load()                              # Load project ACL definitions
+ACL:ACL.list()                              # See available methods
 ```
 
 **ACL.list() Output Example**:
@@ -404,9 +405,9 @@ Each generated method executes the corresponding command via `exec()`.
 **Examples**:
 
 ```acl
-project.note("This project uses TypeScript strict mode")
-project.build()
-project.deploy()
+ACL:project.note("This project uses TypeScript strict mode")
+ACL:project.build()
+ACL:project.deploy()
 ```
 
 **Scope**: Current project only
@@ -449,8 +450,8 @@ fn session.insights(): string {
 **Examples**:
 
 ```acl
-project.note(session.insights())  # Save to project
-note(session.summary())            # Save to user-level
+ACL:project.note(session.insights())  # Save to project
+ACL:note(session.summary())            # Save to user-level
 ```
 
 **Scope**: Current conversation only
@@ -464,7 +465,7 @@ note(session.summary())            # Save to user-level
 **Operator Chaining** - Use `&&` to chain operations:
 
 ```acl
-project.build() && test() && project.deploy()
+ACL:project.build() && test() && project.deploy()
 ```
 
 **Array Format** - Use array syntax for sequential steps:
@@ -506,12 +507,12 @@ method()
 **Examples**:
 
 ```acl
-project.deploy()
+ACL:project.deploy()
   .then("send Slack notification")
   .catch("rollback and alert team")
   .finally("update deployment log")
 
-project.build()
+ACL:project.build()
   .then(test())
   .then(project.deploy())
   .catch(fix("build or test failures"))
@@ -565,14 +566,14 @@ The `alert()` function provides a mechanism for users to notify the agent of vio
 **Examples**:
 
 ```acl
-alert("You modified the wrong file")
+ACL:alert("You modified the wrong file")
 # → Agent immediately halts current work
 # → Agent analyzes what was modified and why it's wrong
 # → Agent presents analysis: "I modified config.prod.yml instead of config.dev.yml because..."
 # → Agent waits for approval
 # → After approval: Agent proceeds to revert/fix
 
-alert("You don't understand the requirements")
+ACL:alert("You don't understand the requirements")
 # → Agent stops
 # → Agent analyzes: "I misunderstood requirement X to mean Y, but it actually means Z"
 # → Agent waits for confirmation
@@ -603,10 +604,10 @@ alert("You don't understand the requirements")
 **Example**:
 
 ```acl
-project.build() && test()
+ACL:project.build() && test()
 # If build fails: agent stops, reports build error, does not run tests
 
-project.build()
+ACL:project.build()
   .then(test())
   .catch(fix("build failure"))
 # If build fails: agent executes fix("build failure")
@@ -686,32 +687,32 @@ fn project.deploy(): void {
 ### Starting Tasks
 
 ```acl
-begin("implement user login feature")
-begin("add email validation")
-begin("create order processing workflow")
+ACL:begin("implement user login feature")
+ACL:begin("add email validation")
+ACL:begin("create order processing workflow")
 ```
 
 ### Quick Fixes
 
 ```acl
-fix("failing tests")
-fix("typescript errors")
-fix(lint().errors)
+ACL:fix("failing tests")
+ACL:fix("typescript errors")
+ACL:fix(lint().errors)
 ```
 
 ### Safe Refactoring
 
 ```acl
-refactor("auth module", "extract logic")
-refactor("API routes", "consolidate error handling")
+ACL:refactor("auth module", "extract logic")
+ACL:refactor("API routes", "consolidate error handling")
 ```
 
 ### Build Pipelines
 
 ```acl
-project.build() && test() && project.deploy()
+ACL:project.build() && test() && project.deploy()
 
-project.build()
+ACL:project.build()
   .then(test())
   .then(project.deploy())
   .catch(fix("pipeline failure"))
@@ -720,7 +721,7 @@ project.build()
 ### Error Handling
 
 ```acl
-project.deploy()
+ACL:project.deploy()
   .then("notify team")
   .catch("rollback")
   .finally("cleanup resources")
@@ -729,34 +730,34 @@ project.deploy()
 ### Knowledge Capture
 
 ```acl
-note("Use TypeScript strict mode")
-note("Prefer composition over inheritance")
-project.note("This project uses feature-based folders")
-project.note(session.insights())
+ACL:note("Use TypeScript strict mode")
+ACL:note("Prefer composition over inheritance")
+ACL:project.note("This project uses feature-based folders")
+ACL:project.note(session.insights())
 ```
 
 ### Web Resources
 
 ```acl
-fetch("https://api.github.com/repos/owner/repo")
-obj apiData = fetch("https://api.example.com/metrics")
-think(apiData.content)
+ACL:fetch("https://api.github.com/repos/owner/repo")
+ACL:obj apiData = fetch("https://api.example.com/metrics")
+ACL:think(apiData.content)
 ```
 
 ### Method Composition
 
 ```acl
-fix(test().failures)
-refactor(lint().errors, "improve code quality")
-think(project.analyze().bottlenecks)
+ACL:fix(test().failures)
+ACL:refactor(lint().errors, "improve code quality")
+ACL:think(project.analyze().bottlenecks)
 ```
 
 ### Documentation
 
 ```acl
-docs("authentication module")
-docs("UserService class")
-docs("REST API endpoints")
+ACL:docs("authentication module")
+ACL:docs("UserService class")
+ACL:docs("REST API endpoints")
 ```
 
 ### Custom Workflows
@@ -770,8 +771,8 @@ fn finish(task): void {
 }
 
 # Usage
-finish("add user authentication")
-finish("fix login bug")
+ACL:finish("add user authentication")
+ACL:finish("fix login bug")
 ```
 
 ---
