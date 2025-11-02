@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.6.0](https://github.com/lacolaco/acl/compare/v1.5.0...v1.6.0) (2025-11-02)
+
+
+### Features
+
+* update ACL syntax to include 'ACL:' prefix in examples and documentation ([81d4d54](https://github.com/lacolaco/acl/commit/81d4d54a32488d9a412174b90c50dbf6809a1b29))
+
 ## [1.5.0](https://github.com/lacolaco/acl/compare/v1.4.0...v1.5.0) (2025-10-10)
 
 
